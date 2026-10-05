@@ -1,0 +1,21 @@
+[project]
+name = "bellracoes"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1,<6.2",
+    "whitenoise>=6.7",
+    "waitress>=3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-django>=4.9",
+    "pytest-playwright>=0.5",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "bellracoes.settings"
+python_files = ["test_*.py"]
+testpaths = ["fiado/tests", "e2e"]

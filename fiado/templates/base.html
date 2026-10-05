@@ -1,0 +1,30 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Fiado{% endblock %} · Bell Rações</title>
+  <link rel="stylesheet" href="{% static 'fiado/app.css' %}">
+  <script src="{% static 'fiado/htmx.min.js' %}" defer></script>
+  <script src="{% static 'fiado/alpine.min.js' %}" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="{% url 'painel' %}">Bell Rações · Fiado</a>
+    {% if user.is_authenticated %}
+    <nav>
+      <a href="{% url 'painel' %}">Painel</a>
+    </nav>
+    <form class="sair" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <span>{{ user.username }}</span>
+      <button>Sair</button>
+    </form>
+    {% endif %}
+  </header>
+  <div id="mensagens">
+    {% for mensagem in messages %}<p class="mensagem {{ mensagem.tags }}">{{ mensagem }}</p>{% endfor %}
+  </div>
+  <main>{% block conteudo %}{% endblock %}</main>
+</body>
+</html>
