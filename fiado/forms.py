@@ -39,3 +39,6 @@ class DividaTotalForm(PagamentoForm):
         localize=True,
         widget=forms.HiddenInput,
     )
+
+
+ItemFormSet = forms.formset_factory(ItemForm, extra=5, can_delete=True)

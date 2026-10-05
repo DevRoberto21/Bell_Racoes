@@ -1,6 +1,6 @@
 from django.urls import path
 
-from fiado.views import clientes, notas, pagamentos, painel
+from fiado.views import clientes, correcoes, notas, pagamentos, painel
 
 NOTA = "notas/<int:cliente_codigo>-<int:numero>/"
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path(NOTA + "descartar/", notas.descartar_view, name="descartar_nota"),
     path(NOTA + "imprimir/", notas.imprimir_nota, name="imprimir_nota"),
     path(NOTA + "pagamento/", pagamentos.pagamento_view, name="pagamento"),
+    path(NOTA + "correcao/", correcoes.correcao, name="correcao"),
     path("clientes/<int:codigo>/pagar/", pagamentos.pagar_divida, name="pagar_divida"),
     path("clientes/<int:codigo>/pagar/previa/", pagamentos.previa_divida, name="previa_divida"),
     path("recibos/<int:pagamento_id>/", pagamentos.recibo, name="recibo"),

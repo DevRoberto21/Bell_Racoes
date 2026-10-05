@@ -106,6 +106,9 @@
       <button>Fechar nota</button>
     </form>
     {% endif %}
+    {% if nota.em_divida %}
+    <a class="botao secundario" href="{% url 'correcao' nota.cliente.codigo nota.numero %}">Correção</a>
+    {% endif %}
     {% if nota.situacao != "RASCUNHO" %}
     <a class="botao secundario" href="{% url 'imprimir_nota' nota.cliente.codigo nota.numero %}">Reimprimir</a>
     {% endif %}

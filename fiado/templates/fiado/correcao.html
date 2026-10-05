@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Correção da nota {{ nota.codigo }}{% endblock %}
+{% block conteudo %}
+<h1>Correção da nota {{ nota.codigo }}</h1>
+<p>{{ nota.cliente.codigo_formatado }} · {{ nota.cliente.nome }} · Já pago: R$ {{ total_pago|floatformat:2 }}</p>
+<p>Altere os itens, marque “Remover” no que sai e use as linhas em branco para acrescentar. Ao salvar, a nota é reimpressa com a marca EDITADO.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="versao" value="{{ versao }}">
+  {{ formset.management_form }}
+  <table class="itens">
+    <thead><tr><th>Descrição</th><th>Quantidade</th><th>Preço</th><th>Remover</th></tr></thead>
+    <tbody>
+      {% for form in formset %}
+      <tr>
+        <td>{{ form.descricao }}{{ form.descricao.errors }}</td>
+        <td>{{ form.quantidade }}{{ form.quantidade.errors }}</td>
+        <td>{{ form.preco_unitario }}{{ form.preco_unitario.errors }}</td>
+        <td>{{ form.DELETE }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button>Salvar correção e reimprimir</button>
+  <a class="botao secundario" href="{{ nota.get_absolute_url }}">Cancelar</a>
+</form>
+{% endblock %}
