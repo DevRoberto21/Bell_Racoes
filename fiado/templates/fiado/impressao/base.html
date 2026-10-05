@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{% block titulo %}Impressão{% endblock %}</title>
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    body { width: 72mm; margin: 0 auto; padding: 2mm; font: 12px/1.3 "Courier New", monospace; color: #000; }
+    h1 { font-size: 14px; text-align: center; margin: 0; }
+    .centro { text-align: center; }
+    .codigo { font-size: 26px; font-weight: 700; text-align: center; margin: 4px 0; }
+    .selo { text-align: center; font-weight: 700; border: 1px solid #000; margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { padding: 1px 0; text-align: left; vertical-align: top; }
+    .num { text-align: right; white-space: nowrap; }
+    .linha { border-top: 1px dashed #000; margin: 4px 0; }
+    .assinatura { margin-top: 14mm; border-top: 1px solid #000; text-align: center; }
+    .via { page-break-after: always; padding-bottom: 6mm; }
+    .via:last-of-type { page-break-after: auto; }
+    @media print { .nao-imprimir { display: none; } }
+  </style>
+</head>
+<body>
+  <p class="nao-imprimir">
+    <a href="{{ voltar }}">Voltar</a>
+    <button type="button" onclick="window.print()">Imprimir de novo</button>
+  </p>
+  {% block conteudo %}{% endblock %}
+  <script>window.addEventListener("load", () => window.print());</script>
+</body>
+</html>

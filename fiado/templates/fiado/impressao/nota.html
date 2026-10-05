@@ -1,0 +1,40 @@
+{% extends "fiado/impressao/base.html" %}
+{% block titulo %}Nota {{ nota.codigo }}{% endblock %}
+{% block conteudo %}
+{% for via in vias %}
+<section class="via">
+  <h1>{{ loja.nome }}</h1>
+  {% if loja.endereco %}<div class="centro">{{ loja.endereco }}</div>{% endif %}
+  {% if loja.telefone %}<div class="centro">{{ loja.telefone }}</div>{% endif %}
+  <div class="linha"></div>
+  <div class="centro">NOTA DE FIADO · {{ nota.get_tipo_display|upper }}</div>
+  <div class="codigo">{{ nota.codigo }}</div>
+  {% if nota.editada %}<div class="selo">EDITADO em {{ nota.editada_em|date:"d/m/Y H:i" }}</div>{% endif %}
+  <div>Cliente: {{ nota.cliente.codigo_formatado }} · {{ nota.cliente.nome }}</div>
+  <div>Data: {{ nota.criada_em|date:"d/m/Y H:i" }}</div>
+  <div class="linha"></div>
+  <table>
+    {% for item in itens %}
+    <tr><td colspan="2">{{ item.descricao }}</td></tr>
+    <tr>
+      <td>{{ item.quantidade|floatformat:"-3" }} x {{ item.preco_unitario|floatformat:2 }}</td>
+      <td class="num">{{ item.subtotal|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="linha"></div>
+  <table>
+    <tr><td>TOTAL</td><td class="num">R$ {{ total|floatformat:2 }}</td></tr>
+    {% for pagamento in pagamentos %}
+    <tr>
+      <td>Pago {{ pagamento.recebido_em|date:"d/m" }} ({{ pagamento.get_forma_display }})</td>
+      <td class="num">-{{ pagamento.valor|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+    <tr><th>SALDO</th><th class="num">R$ {{ saldo|floatformat:2 }}</th></tr>
+  </table>
+  <div class="assinatura">Assinatura do cliente</div>
+  <div class="centro">{{ via }}</div>
+</section>
+{% endfor %}
+{% endblock %}

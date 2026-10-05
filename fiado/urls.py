@@ -15,4 +15,10 @@ urlpatterns = [
     path("clientes/<int:codigo>/nota/", clientes.abrir_nota_do_cliente, name="abrir_nota_do_cliente"),
     path("clientes/<int:codigo>/notas/nova/", clientes.nova_nota, name="nova_nota"),
     path(NOTA, notas.nota_detalhe, name="nota"),
+    path(NOTA + "itens/", notas.adicionar_item_view, name="adicionar_item"),
+    path(NOTA + "itens/<int:item_id>/remover/", notas.remover_item_view, name="remover_item"),
+    path(NOTA + "finalizar/", notas.finalizar_view, name="finalizar_nota"),
+    path(NOTA + "fechar/", notas.fechar_view, name="fechar_nota"),
+    path(NOTA + "descartar/", notas.descartar_view, name="descartar_nota"),
+    path(NOTA + "imprimir/", notas.imprimir_nota, name="imprimir_nota"),
 ]

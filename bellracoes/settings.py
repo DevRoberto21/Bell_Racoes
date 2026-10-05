@@ -52,6 +52,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "fiado.contexto.loja",
             ],
         },
     },
@@ -87,3 +88,7 @@ LOGIN_REDIRECT_URL = "painel"
 LOGOUT_REDIRECT_URL = "login"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+
+LOJA_NOME = os.environ.get("BELL_LOJA_NOME", "Bell Rações")
+LOJA_ENDERECO = os.environ.get("BELL_LOJA_ENDERECO", "")
+LOJA_TELEFONE = os.environ.get("BELL_LOJA_TELEFONE", "")

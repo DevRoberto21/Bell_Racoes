@@ -21,13 +21,35 @@
         <td class="num">{{ item.quantidade|floatformat:"-3" }}</td>
         <td class="num">{{ item.preco_unitario|floatformat:2 }}</td>
         <td class="num">{{ item.subtotal|floatformat:2 }}</td>
-        <td></td>
+        <td>
+          {% if nota.situacao == "RASCUNHO" %}
+          <form method="post" action="{% url 'remover_item' nota.cliente.codigo nota.numero item.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="versao" value="{{ nota.versao }}">
+            <button class="secundario">Remover</button>
+          </form>
+          {% endif %}
+        </td>
       </tr>
       {% empty %}
       <tr><td colspan="5">Nenhum item.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  {% if nota.aceita_itens %}
+  <form class="novo-item" method="post"
+        action="{% url 'adicionar_item' nota.cliente.codigo nota.numero %}"
+        hx-post="{% url 'adicionar_item' nota.cliente.codigo nota.numero %}"
+        hx-target="#nota-corpo" hx-select="#nota-corpo" hx-swap="outerHTML"
+        hx-select-oob="#mensagens">
+    {% csrf_token %}
+    <input type="hidden" name="versao" value="{{ nota.versao }}">
+    <label>Descrição <input name="descricao" maxlength="120" required autofocus></label>
+    <label>Quantidade <input name="quantidade" value="1" inputmode="decimal" required></label>
+    <label>Preço <input name="preco_unitario" inputmode="decimal" required></label>
+    <button>Adicionar item</button>
+  </form>
+  {% endif %}
 
   {% if pagamentos %}
   <table class="pagamentos">
@@ -48,6 +70,30 @@
   <p class="totais">Total: R$ {{ total|floatformat:2 }} · Pago: R$ {{ total_pago|floatformat:2 }} · <strong>Saldo: R$ {{ saldo|floatformat:2 }}</strong></p>
 
   <section class="acoes">
+    {% if nota.situacao == "RASCUNHO" %}
+    <form method="post" action="{% url 'finalizar_nota' nota.cliente.codigo nota.numero %}">
+      {% csrf_token %}
+      <input type="hidden" name="versao" value="{{ nota.versao }}">
+      <button>Finalizar e imprimir</button>
+    </form>
+    {% endif %}
+    {% if nota.tipo == "CONTINUA" and nota.situacao == "ABERTA" %}
+    <form method="post" action="{% url 'fechar_nota' nota.cliente.codigo nota.numero %}">
+      {% csrf_token %}
+      <input type="hidden" name="versao" value="{{ nota.versao }}">
+      <button>Fechar nota</button>
+    </form>
+    {% endif %}
+    {% if nota.situacao != "RASCUNHO" %}
+    <a class="botao secundario" href="{% url 'imprimir_nota' nota.cliente.codigo nota.numero %}">Reimprimir</a>
+    {% endif %}
+    {% if nota.situacao == "RASCUNHO" or nota.situacao == "ABERTA" and not itens and not pagamentos %}
+    <form method="post" action="{% url 'descartar_nota' nota.cliente.codigo nota.numero %}">
+      {% csrf_token %}
+      <input type="hidden" name="versao" value="{{ nota.versao }}">
+      <button class="secundario">Descartar</button>
+    </form>
+    {% endif %}
   </section>
 </div>
 {% endblock %}
