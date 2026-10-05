@@ -10,8 +10,8 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 
    ```bat
    uv sync --no-dev
-   uv run python manage.py migrate
-   uv run python manage.py criar_caixas
+   uv run --no-dev python manage.py migrate
+   uv run --no-dev python manage.py criar_caixas
    ```
 
    O último comando pede a senha do `caixa1` e do `caixa2`. Rode de novo quando quiser trocar uma senha.
@@ -34,16 +34,32 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 
 ## Dados da loja no impresso
 
-Antes de rodar `iniciar.bat`, defina as variáveis de ambiente do Windows:
+O nome, o endereço e o telefone que saem na nota e no recibo ficam no começo do arquivo `iniciar.bat`:
 
-| Variável | Exemplo |
-| --- | --- |
-| `BELL_LOJA_NOME` | Bell Rações |
-| `BELL_LOJA_ENDERECO` | Rua Exemplo, 123 |
-| `BELL_LOJA_TELEFONE` | (85) 99999-0000 |
+1. Clique com o botão direito em `iniciar.bat` e escolha **Editar**.
+2. Altere o que vem depois do sinal de igual nestas três linhas, sem aspas:
+
+   ```bat
+   set BELL_LOJA_NOME=Bell Rações
+   set BELL_LOJA_ENDERECO=Rua Exemplo, 123
+   set BELL_LOJA_TELEFONE=(85) 99999-0000
+   ```
+
+3. Salve, feche a janela preta do sistema e abra o `iniciar.bat` de novo.
 
 ## Onde ficam os dados
 
 - Banco: `C:\BellRacoes\dados\bellracoes.sqlite3`.
-- Cópias de segurança: `C:\BellRacoes\dados\backups\`, uma por dia, últimas 30. Para gravar em outro lugar (pen drive, pasta do Google Drive), defina `BELL_BACKUP_DIR`.
-- Para restaurar: feche a janela do `iniciar.bat`, copie o arquivo do dia desejado por cima de `bellracoes.sqlite3` e abra o `iniciar.bat` de novo.
+- Cópias de segurança: `C:\BellRacoes\dados\backups\`, uma por dia, últimas 30. Para gravar em outro lugar (pen drive, pasta do Google Drive), defina `BELL_BACKUP_DIR`. Para definir, acrescente uma linha `set BELL_BACKUP_DIR=E:\backups-bell` no `iniciar.bat`, junto das linhas da loja.
+
+### Como restaurar uma cópia
+
+Faça isto só se o banco atual estiver perdido ou estragado. Tudo o que foi lançado depois da cópia escolhida se perde.
+
+1. Feche a janela preta do `iniciar.bat`.
+2. Abra a pasta `C:\BellRacoes\dados`.
+3. Renomeie `bellracoes.sqlite3` para `bellracoes-estragado.sqlite3`. Assim o arquivo atual fica guardado.
+4. Apague os arquivos `bellracoes.sqlite3-wal` e `bellracoes.sqlite3-shm`, se existirem.
+5. Abra a pasta `backups`, copie o arquivo do dia desejado (por exemplo `bellracoes-2026-10-05.sqlite3`) e cole na pasta `dados`.
+6. Renomeie a cópia colada para exatamente `bellracoes.sqlite3`.
+7. Abra o `iniciar.bat` de novo e confira as notas de um cliente conhecido.
