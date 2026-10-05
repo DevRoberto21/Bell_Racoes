@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Contas pagas{% endblock %}
+{% block conteudo %}
+<h1>Contas pagas</h1>
+<p>Notas quitadas nos últimos 7 dias. As mais antigas continuam guardadas e abrem pelo código na busca.</p>
+<table>
+  <thead>
+    <tr><th>Nota</th><th>Cliente</th><th>Tipo</th><th>Quitada em</th><th class="num">Total (R$)</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for nota in notas %}
+    <tr>
+      <td><a href="{{ nota.get_absolute_url }}">{{ nota.codigo }}</a></td>
+      <td>{{ nota.cliente.nome }}</td>
+      <td>{{ nota.get_tipo_display }}</td>
+      <td>{{ nota.quitada_em|date:"d/m/Y H:i" }}</td>
+      <td class="num">{{ nota.total|floatformat:2 }}</td>
+      <td><a href="{% url 'imprimir_nota' nota.cliente.codigo nota.numero %}">Reimprimir</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Nenhuma nota quitada nos últimos 7 dias.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

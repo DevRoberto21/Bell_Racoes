@@ -27,4 +27,5 @@ urlpatterns = [
     path("clientes/<int:codigo>/pagar/previa/", pagamentos.previa_divida, name="previa_divida"),
     path("recibos/<int:pagamento_id>/", pagamentos.recibo, name="recibo"),
     path("recibos/lote/<uuid:lote>/", pagamentos.recibo_lote, name="recibo_lote"),
+    path("pagas/", painel.pagas, name="pagas"),
 ]

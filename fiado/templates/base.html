@@ -15,6 +15,7 @@
     <nav>
       <a href="{% url 'painel' %}">Painel</a>
       <a href="{% url 'clientes' %}">Clientes</a>
+      <a href="{% url 'pagas' %}">Contas pagas</a>
     </nav>
     <form class="busca" action="{% url 'busca' %}" method="get">
       <input name="q" value="{{ request.GET.q }}" autocomplete="off"
