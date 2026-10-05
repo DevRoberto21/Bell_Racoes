@@ -1,0 +1,1084 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "WCPzRxGwYndIx0eMkUE8l",
+      "type": "rectangle",
+      "x": 729.02734375,
+      "y": 167.1875,
+      "width": 191.66796875,
+      "height": 161.67578125,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5P",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1934295008,
+      "version": 133,
+      "versionNonce": 623496736,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "sr4xmscr8eMxfhcZl92Gm"
+        },
+        {
+          "id": "-a3ifXOHzUeWjUmjpY-A1",
+          "type": "arrow"
+        },
+        {
+          "id": "7Ss5hUhE2UXZO8b9ewuq3",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1790623440382,
+      "created": 1790622970910,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "sr4xmscr8eMxfhcZl92Gm",
+      "type": "text",
+      "x": 742.9914016723633,
+      "y": 223.025390625,
+      "width": 163.73985290527344,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5Q",
+      "roundness": null,
+      "seed": 1586237984,
+      "version": 202,
+      "versionNonce": 20848608,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790623060488,
+      "created": 1790622973635,
+      "link": null,
+      "locked": false,
+      "text": "Sistema Central\nPara Bell Rações",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "WCPzRxGwYndIx0eMkUE8l",
+      "originalText": "Sistema Central Para Bell Rações",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "rqFU8sZJi8laIJIWlTV_s",
+      "type": "rectangle",
+      "x": 486.30002785217994,
+      "y": 455.5056494266601,
+      "width": 218.55078125,
+      "height": 216.875,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5X",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 249346016,
+      "version": 217,
+      "versionNonce": 647629792,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "KNWAq7uwu0k49cYpQuwPE"
+        },
+        {
+          "id": "-a3ifXOHzUeWjUmjpY-A1",
+          "type": "arrow"
+        },
+        {
+          "id": "y7RFLg6dOF5NhAOXWXRdB",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1790623416585,
+      "created": 1790623067096,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "KNWAq7uwu0k49cYpQuwPE",
+      "type": "text",
+      "x": 551.3054370929026,
+      "y": 551.44314942666,
+      "width": 88.53996276855469,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5XV",
+      "roundness": null,
+      "seed": 2028923872,
+      "version": 149,
+      "versionNonce": 1258995680,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790623206689,
+      "created": 1790623099044,
+      "link": null,
+      "locked": false,
+      "text": "Estoque ",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "rqFU8sZJi8laIJIWlTV_s",
+      "originalText": "Estoque ",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "-a3ifXOHzUeWjUmjpY-A1",
+      "type": "arrow",
+      "x": 750.076290708033,
+      "y": 321.0168150754541,
+      "width": 143.88944493124586,
+      "height": 144.3376245193611,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5Z",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1496320992,
+      "version": 39,
+      "versionNonce": 1468408800,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790623123595,
+      "created": 1790623122746,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -143.88944493124586,
+          144.3376245193611
+        ]
+      ],
+      "startBinding": {
+        "elementId": "WCPzRxGwYndIx0eMkUE8l",
+        "mode": "inside",
+        "fixedPoint": [
+          0.10981984676577816,
+          0.9514678938683284
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "rqFU8sZJi8laIJIWlTV_s",
+        "mode": "inside",
+        "fixedPoint": [
+          0.5485536003985672,
+          0.045412288959792796
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "A6K6OiJTlzPx0K_UhyR8f",
+      "type": "rectangle",
+      "x": 293.9816525745129,
+      "y": 848.0654628176543,
+      "width": 286.67831300459414,
+      "height": 268.43560525518853,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5c",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 2030340640,
+      "version": 92,
+      "versionNonce": 1727083436,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "HLMPzNhFY2oGcIyhx36AG"
+        },
+        {
+          "id": "y7RFLg6dOF5NhAOXWXRdB",
+          "type": "arrow"
+        },
+        {
+          "id": "vNWbHeXwjeQvzRReVng5c",
+          "type": "arrow"
+        },
+        {
+          "id": "iWjJt5nXx3ISCa75rypEP",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1790640221677,
+      "created": 1790623182443,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "HLMPzNhFY2oGcIyhx36AG",
+      "type": "text",
+      "x": 300.13091344692714,
+      "y": 857.2832654452486,
+      "width": 274.3797912597656,
+      "height": 250,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5cG",
+      "roundness": null,
+      "seed": 1122747936,
+      "version": 805,
+      "versionNonce": 409931412,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790640304648,
+      "created": 1790623229532,
+      "link": null,
+      "locked": false,
+      "text": "Controle de todo o\nestoque, com a capacidade\nde resgistrar os itens com e\nsem NF;\nQue emitisse aviso quando\nestoques ficassem baixos;\nGeressa um relátorio com\ngraficos dos produtos mais\nvendidos em uma janela de\ntempo;",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "A6K6OiJTlzPx0K_UhyR8f",
+      "originalText": "Controle de todo o estoque, com a capacidade de resgistrar os itens com e sem NF;\nQue emitisse aviso quando estoques ficassem baixos;\nGeressa um relátorio com graficos dos produtos mais vendidos em uma janela de tempo;",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "y7RFLg6dOF5NhAOXWXRdB",
+      "type": "arrow",
+      "x": 512.0894973686713,
+      "y": 667.4665563554585,
+      "width": 47.00695174716708,
+      "height": 193.4956551525869,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5g",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1474068448,
+      "version": 68,
+      "versionNonce": 450967724,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790640221677,
+      "created": 1790623416584,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -47.00695174716708,
+          193.4956551525869
+        ]
+      ],
+      "startBinding": {
+        "elementId": "rqFU8sZJi8laIJIWlTV_s",
+        "mode": "inside",
+        "fixedPoint": [
+          0.11800218406444798,
+          0.9773413575967648
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "A6K6OiJTlzPx0K_UhyR8f",
+        "mode": "inside",
+        "fixedPoint": [
+          0.5968393327480248,
+          0.04804410606458394
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "moveMidPointsWithElement": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "EpABJkqtsLNeDNWovjmsl",
+      "type": "rectangle",
+      "x": 972.5828388081928,
+      "y": 468.4750399398529,
+      "width": 279.5222826109492,
+      "height": 191.36120573125072,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5h",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 910278624,
+      "version": 87,
+      "versionNonce": 1339798048,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "7Ss5hUhE2UXZO8b9ewuq3",
+          "type": "arrow"
+        },
+        {
+          "id": "NKyPjtsPGkeURh7xNda3n",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1790623825352,
+      "created": 1790623432131,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "Kzi2HSClmDslbQd__Cv4n",
+      "type": "text",
+      "x": 1070.9908335760194,
+      "y": 544.89521148508,
+      "width": 53.71995544433594,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5i",
+      "roundness": null,
+      "seed": 1299003936,
+      "version": 46,
+      "versionNonce": 322054572,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790638792847,
+      "created": 1790623435886,
+      "link": null,
+      "locked": false,
+      "text": "Fiado",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Fiado",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "7Ss5hUhE2UXZO8b9ewuq3",
+      "type": "arrow",
+      "x": 911.4386048892397,
+      "y": 315.25406859817963,
+      "width": 138.63543951544352,
+      "height": 168.6285084318465,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5j",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 519641632,
+      "version": 48,
+      "versionNonce": 57220640,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790623441266,
+      "created": 1790623440381,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          138.63543951544352,
+          168.6285084318465
+        ]
+      ],
+      "startBinding": {
+        "elementId": "WCPzRxGwYndIx0eMkUE8l",
+        "mode": "inside",
+        "fixedPoint": [
+          0.9517044622994145,
+          0.9158240489292804
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "EpABJkqtsLNeDNWovjmsl",
+        "mode": "inside",
+        "fixedPoint": [
+          0.2772272924815297,
+          0.08051546828050267
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "DDu0nzsCV1gFrr9WLJf1z",
+      "type": "rectangle",
+      "x": 1295.5733519704945,
+      "y": 740.9546793704087,
+      "width": 399.5998397389383,
+      "height": 186.34818840729952,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5k",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 2098552800,
+      "version": 61,
+      "versionNonce": 2012083348,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "fiEuytV559kiZhzjBoHcB"
+        },
+        {
+          "id": "c46WPxxW1I28TP4TPKfUz",
+          "type": "arrow"
+        },
+        {
+          "id": "NKyPjtsPGkeURh7xNda3n",
+          "type": "arrow"
+        },
+        {
+          "id": "iWjJt5nXx3ISCa75rypEP",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1790639592388,
+      "created": 1790623449281,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "fiEuytV559kiZhzjBoHcB",
+      "type": "text",
+      "x": 1304.963420765745,
+      "y": 784.1287735740584,
+      "width": 380.8197021484375,
+      "height": 100,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5l",
+      "roundness": null,
+      "seed": 2001721888,
+      "version": 745,
+      "versionNonce": 1438607892,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790638918628,
+      "created": 1790623451588,
+      "link": null,
+      "locked": false,
+      "text": "-Sistema de controle de vendas fiadas;\nPlataforma lista todos os itens do\nestoque, atendente seleciona os itens\ndo cliente, pega nome e telefone.",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "DDu0nzsCV1gFrr9WLJf1z",
+      "originalText": "-Sistema de controle de vendas fiadas;\nPlataforma lista todos os itens do estoque, atendente seleciona os itens do cliente, pega nome e telefone.",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "N301bqPQCKKELcBwHm3Qz",
+      "type": "rectangle",
+      "x": 1498.6504678048168,
+      "y": 1068.7653315094312,
+      "width": 392.4056850930051,
+      "height": 260,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5m",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 868090400,
+      "version": 70,
+      "versionNonce": 152424596,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "c46WPxxW1I28TP4TPKfUz",
+          "type": "arrow"
+        },
+        {
+          "type": "text",
+          "id": "WKl1b9-uPc2Tkhirhp-Io"
+        }
+      ],
+      "updated": 1790639613777,
+      "created": 1790623641867,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "WKl1b9-uPc2Tkhirhp-Io",
+      "type": "text",
+      "x": 1505.6734092282725,
+      "y": 1073.7653315094312,
+      "width": 378.35980224609375,
+      "height": 250,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5mV",
+      "roundness": null,
+      "seed": 1636344352,
+      "version": 773,
+      "versionNonce": 412865940,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790639618524,
+      "created": 1790623651101,
+      "link": null,
+      "locked": false,
+      "text": "-Será emetido 2 notas com os dados\ncomo nome e telefone do cliente e os\nprodutos. Uma para ficar com a loja e\noutra para o cliente, com uma linha\npara o cliente poder assinar. \nTer uma página dos devedores, onde\nlistará os clintes com dividas em\naberto e a quanto tempo a conta está\naberta, a cada 7 dias a plataforma\nemite um aviso. ",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "N301bqPQCKKELcBwHm3Qz",
+      "originalText": "-Será emetido 2 notas com os dados como nome e telefone do cliente e os produtos. Uma para ficar com a loja e outra para o cliente, com uma linha para o cliente poder assinar. \nTer uma página dos devedores, onde listará os clintes com dividas em aberto e a quanto tempo a conta está aberta, a cada 7 dias a plataforma emite um aviso. ",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "c46WPxxW1I28TP4TPKfUz",
+      "type": "arrow",
+      "x": 1498.2837040256454,
+      "y": 933.3028677777082,
+      "width": 116.29550362721966,
+      "height": 145.08350697737603,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5n",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 429600736,
+      "version": 59,
+      "versionNonce": 1440856980,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790639613782,
+      "created": 1790623645986,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          116.29550362721966,
+          145.08350697737603
+        ]
+      ],
+      "startBinding": {
+        "elementId": "DDu0nzsCV1gFrr9WLJf1z",
+        "mode": "orbit",
+        "fixedPoint": [
+          0.36049351427750037,
+          0.6395064857224999
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "N301bqPQCKKELcBwHm3Qz",
+        "mode": "inside",
+        "fixedPoint": [
+          0.29543083663676206,
+          0.037004012483281286
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "moveMidPointsWithElement": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "NKyPjtsPGkeURh7xNda3n",
+      "type": "arrow",
+      "x": 1157.2501534217936,
+      "y": 651.5704046783375,
+      "width": 255.7402971668098,
+      "height": 104.19200756016323,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5o",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1386249760,
+      "version": 38,
+      "versionNonce": 2049570988,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790638799085,
+      "created": 1790623825351,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          255.7402971668098,
+          104.19200756016323
+        ]
+      ],
+      "startBinding": {
+        "elementId": "EpABJkqtsLNeDNWovjmsl",
+        "mode": "inside",
+        "fixedPoint": [
+          0.6606532863450763,
+          0.9568050328634805
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "DDu0nzsCV1gFrr9WLJf1z",
+        "mode": "inside",
+        "fixedPoint": [
+          0.29383670097269904,
+          0.07946271436632839
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "moveMidPointsWithElement": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "R2J539UCqkYjezPRItwQ5",
+      "type": "rectangle",
+      "x": 301.2289232110819,
+      "y": 1243.9098915603317,
+      "width": 304.8743403570493,
+      "height": 385,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5p",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1329328276,
+      "version": 76,
+      "versionNonce": 282243116,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "vNWbHeXwjeQvzRReVng5c",
+          "type": "arrow"
+        },
+        {
+          "type": "text",
+          "id": "k6-40NcHw3MpMzyM1gcnc"
+        }
+      ],
+      "updated": 1790639567605,
+      "created": 1790639154842,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "k6-40NcHw3MpMzyM1gcnc",
+      "type": "text",
+      "x": 311.11616663179404,
+      "y": 1248.9098915603317,
+      "width": 285.099853515625,
+      "height": 375,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5pV",
+      "roundness": null,
+      "seed": 1762525460,
+      "version": 575,
+      "versionNonce": 568576684,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790639567606,
+      "created": 1790639164648,
+      "link": null,
+      "locked": false,
+      "text": "Calculadora de precificação:\nDeve ser possivel enviar um\narquivo xml ou foto e o\nsistema identificar todos os\nprodutos listados com seus\nrespectivos preços;\nNo momento de colocar os\npreços deve ser mostrado o\nhistorico e os campos de\nmargens;\nNo final deve gerar uma\nplanilha com todos os valores\ndaquela nota já editados; \n\n",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "R2J539UCqkYjezPRItwQ5",
+      "originalText": "Calculadora de precificação:\nDeve ser possivel enviar um arquivo xml ou foto e o sistema identificar todos os produtos listados com seus respectivos preços;\nNo momento de colocar os preços deve ser mostrado o historico e os campos de margens;\nNo final deve gerar uma planilha com todos os valores daquela nota já editados; \n\n",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    },
+    {
+      "id": "vNWbHeXwjeQvzRReVng5c",
+      "type": "arrow",
+      "x": 454.17852654768114,
+      "y": 1076.174618907912,
+      "width": 10.03281191476458,
+      "height": 174.65660120394227,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5q",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1796251796,
+      "version": 59,
+      "versionNonce": 1779254060,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790640221678,
+      "created": 1790639160692,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -10.03281191476458,
+          174.65660120394227
+        ]
+      ],
+      "startBinding": {
+        "elementId": "A6K6OiJTlzPx0K_UhyR8f",
+        "mode": "inside",
+        "fixedPoint": [
+          0.5588036021776123,
+          0.849772353683877
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "R2J539UCqkYjezPRItwQ5",
+        "mode": "inside",
+        "fixedPoint": [
+          0.4687727778417156,
+          0.017977476757201023
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "moveMidPointsWithElement": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "iWjJt5nXx3ISCa75rypEP",
+      "type": "arrow",
+      "x": 579.5457745734307,
+      "y": 964.3043206183055,
+      "width": 727.3637972397696,
+      "height": 121.56611400127247,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5r",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 416354580,
+      "version": 102,
+      "versionNonce": 1012137388,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790640221678,
+      "created": 1790639590423,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          727.3637972397696,
+          -121.56611400127247
+        ]
+      ],
+      "startBinding": {
+        "elementId": "A6K6OiJTlzPx0K_UhyR8f",
+        "mode": "inside",
+        "fixedPoint": [
+          0.9961134450876354,
+          0.43302324849994706
+        ],
+        "focus": 0
+      },
+      "endBinding": {
+        "elementId": "DDu0nzsCV1gFrr9WLJf1z",
+        "mode": "inside",
+        "fixedPoint": [
+          0.02836892990275422,
+          0.5462007874428969
+        ],
+        "focus": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "moveMidPointsWithElement": false,
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "yPBETYqkcAmCm2RxfhTCg",
+      "type": "text",
+      "x": 2066.3933252715624,
+      "y": 53.55744595046491,
+      "width": 1567.2391357421875,
+      "height": 325,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "b5v",
+      "roundness": null,
+      "seed": 2066022932,
+      "version": 1528,
+      "versionNonce": 963020345,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1790640409833,
+      "created": 1790639647292,
+      "link": null,
+      "locked": false,
+      "text": "Contexto: \nA loja bell rações usa atualmente o sistema Moderniza(moderloja e modernizapdv);\nO problema que boa parte dos produtos não tem NFs como gaiolas, botas, bebedouros e etc;\nE devido ao foco do atendimento ser a velocidade, há momentos que pagamentos em especie de determinados produtos não são emitidos notas fiscal \nE há casos de produtos sem NF que são pagos em cartão ou pix que é necessario dar a baixa de outros \nprodutos com maior número de estoque para completar o valor;\nE produtos que estão estoque, mas não estão cadastrados no sistema central(devido ao negocio de dar baixa de produtos de alto estoque para suprir os sem).\nA ideia é montar o sistema auxiliar de controle de estoque e vendas de fiado, separado do sistema Padrão da loja,\nSem alterar a estrutura de negocio;\nO problema central é como gerir um sistema de estoque que provalmente uma parta das vendas não será registrado;\nPrecisamos pensar em uma solução para isso.\nRecibi uma sugestão de usar o kaban.\n",
+      "fontSize": 20,
+      "baseFontSize": null,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Contexto: \nA loja bell rações usa atualmente o sistema Moderniza(moderloja e modernizapdv);\nO problema que boa parte dos produtos não tem NFs como gaiolas, botas, bebedouros e etc;\nE devido ao foco do atendimento ser a velocidade, há momentos que pagamentos em especie de determinados produtos não são emitidos notas fiscal \nE há casos de produtos sem NF que são pagos em cartão ou pix que é necessario dar a baixa de outros \nprodutos com maior número de estoque para completar o valor;\nE produtos que estão estoque, mas não estão cadastrados no sistema central(devido ao negocio de dar baixa de produtos de alto estoque para suprir os sem).\nA ideia é montar o sistema auxiliar de controle de estoque e vendas de fiado, separado do sistema Padrão da loja,\nSem alterar a estrutura de negocio;\nO problema central é como gerir um sistema de estoque que provalmente uma parta das vendas não será registrado;\nPrecisamos pensar em uma solução para isso.\nRecibi uma sugestão de usar o kaban.\n",
+      "autoResize": true,
+      "lineHeight": 1.25,
+      "labelPosition": null
+    }
+  ],
+  "appState": {
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
