@@ -12,3 +12,10 @@ def usuario(django_user_model):
 def logado(client, usuario):
     client.force_login(usuario)
     return client
+
+
+@pytest.fixture
+def cliente(db):
+    from fiado.servicos.clientes import criar_cliente
+
+    return criar_cliente(nome="Maria da Silva", apelido="Mariinha", telefone="85999990000")
