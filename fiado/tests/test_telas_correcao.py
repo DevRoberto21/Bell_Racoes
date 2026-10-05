@@ -10,11 +10,11 @@ from fiado.tests.fabrica import nota_unica_fechada
 pytestmark = pytest.mark.django_db
 
 
-def _formulario(nota, linhas):
+def _formulario(nota, linhas, iniciais=0):
     dados = {
         "versao": nota.versao,
         "form-TOTAL_FORMS": str(len(linhas)),
-        "form-INITIAL_FORMS": "0",
+        "form-INITIAL_FORMS": str(iniciais),
         "form-MIN_NUM_FORMS": "0",
         "form-MAX_NUM_FORMS": "1000",
     }
@@ -117,3 +117,75 @@ def test_rascunho_e_quitada_nao_abrem_a_tela_de_correcao(logado, cliente, usuari
     )
     html = logado.get("/notas/1-2/").content.decode()
     assert "/correcao/" not in html
+
+
+VAZIA = {"descricao": "", "quantidade": "", "preco_unitario": ""}
+
+
+def test_formulario_da_tela_informa_as_linhas_iniciais(logado, cliente, usuario):
+    nota_unica_fechada(cliente, usuario, "100.00")
+    html = logado.get("/notas/1-1/correcao/").content.decode()
+    assert 'name="form-INITIAL_FORMS" value="1"' in html
+    assert 'name="form-TOTAL_FORMS" value="6"' in html
+
+
+def test_editar_linha_existente(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    resposta = logado.post(
+        "/notas/1-1/correcao/", _formulario(nota, [_linha("Ração 15kg", "90,00")], iniciais=1)
+    )
+    assert resposta["Location"] == "/notas/1-1/imprimir/"
+    nota.refresh_from_db()
+    assert nota.total == Decimal("90.00")
+    assert nota.editada is True
+
+
+def test_marcar_linha_existente_para_remover(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    logado.post(
+        "/notas/1-1/correcao/",
+        _formulario(
+            nota,
+            [_linha("Ração 15kg", "100,00", DELETE="on"), _linha("Ração 10kg", "70,00")],
+            iniciais=1,
+        ),
+    )
+    assert [i.descricao for i in nota.itens.all()] == ["Ração 10kg"]
+
+
+def test_apagar_os_campos_de_uma_linha_existente_remove_a_linha(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    resposta = logado.post(
+        "/notas/1-1/correcao/",
+        _formulario(nota, [VAZIA, _linha("Ração 10kg", "70,00")], iniciais=1),
+    )
+    assert resposta["Location"] == "/notas/1-1/imprimir/"
+    assert [i.descricao for i in nota.itens.all()] == ["Ração 10kg"]
+
+
+def test_linha_preenchida_pela_metade_mostra_erro(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    resposta = logado.post(
+        "/notas/1-1/correcao/",
+        _formulario(
+            nota,
+            [{"descricao": "Ração", "quantidade": "1", "preco_unitario": ""}],
+            iniciais=1,
+        ),
+    )
+    assert resposta.status_code == 200
+    html = resposta.content.decode()
+    assert 'value="Ração"' in html
+    assert "Confira descrição, quantidade e preço de cada item." in html
+    nota.refresh_from_db()
+    assert nota.editada is False
+
+
+def test_todas_as_linhas_em_branco_nao_esvazia_a_nota(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    resposta = logado.post("/notas/1-1/correcao/", _formulario(nota, [VAZIA], iniciais=1))
+    assert resposta.status_code == 200
+    assert "pelo menos um item" in resposta.content.decode()
+    nota.refresh_from_db()
+    assert nota.editada is False
+    assert nota.itens.count() == 1

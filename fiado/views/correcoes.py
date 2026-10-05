@@ -24,7 +24,7 @@ def correcao(request, cliente_codigo, numero):
         return redirect(nota)
 
     if request.method == "POST":
-        formset = ItemFormSet(request.POST)
+        formset = ItemFormSet(request.POST, form_kwargs={"empty_permitted": True})
         versao = request.POST.get("versao")
         if formset.is_valid():
             try:
