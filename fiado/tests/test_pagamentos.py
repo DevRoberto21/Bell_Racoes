@@ -39,7 +39,7 @@ def test_pagamento_total_quita_a_nota(cliente, usuario):
     assert nota.quitada_em is not None
 
 
-@pytest.mark.parametrize("valor", ["100.01", "0", "-5.00"])
+@pytest.mark.parametrize("valor", ["100.01", "0", "-5.00", "0.004", "99.999", "NaN"])
 def test_valor_invalido_e_bloqueado(cliente, usuario, valor):
     nota = nota_unica_fechada(cliente, usuario, valor="100.00")
     with pytest.raises(ErroDeRegra):
@@ -61,6 +61,15 @@ def test_rascunho_e_quitada_nao_recebem_pagamento(cliente, usuario):
     quitada = _pagar(nota_unica_fechada(cliente, usuario, valor="50.00"), usuario, "50.00").nota
     with pytest.raises(ErroDeRegra):
         _pagar(quitada, usuario, "1.00")
+
+
+def test_registrar_pagamento_rejeita_forma_invalida(cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, valor="100.00")
+    with pytest.raises(ErroDeRegra):
+        registrar_pagamento(
+            nota=nota, versao=nota.versao, valor=Decimal("10.00"), forma="CHEQUE", usuario=usuario
+        )
+    assert Pagamento.objects.count() == 0
 
 
 def test_pagamento_com_versao_antiga_e_recusado(cliente, usuario):
@@ -90,6 +99,7 @@ def test_distribuir_vai_da_mais_antiga_para_a_mais_recente(cliente, usuario):
         (media.pk, Decimal("50.00")),
     ]
     assert sobra == Decimal("0.00")
+    # Total debt from _tres_notas is 50.00 + 80.00 + 30.00 = 160.00
 
 
 def test_distribuir_ignora_rascunho_e_nota_sem_saldo(cliente, usuario):
@@ -105,7 +115,7 @@ def test_distribuir_ignora_rascunho_e_nota_sem_saldo(cliente, usuario):
 def test_pagar_divida_total_gera_um_pagamento_por_nota_no_mesmo_lote(cliente, usuario):
     antiga, media, nova = _tres_notas(cliente, usuario)
     pagamentos = pagar_divida_total(
-        cliente=cliente, valor=Decimal("100.00"), forma=DINHEIRO, usuario=usuario
+        cliente=cliente, valor=Decimal("100.00"), forma=DINHEIRO, usuario=usuario, divida_esperada=Decimal("160.00")
     )
     assert [(p.nota_id, p.valor) for p in pagamentos] == [
         (antiga.pk, Decimal("50.00")),
@@ -125,16 +135,49 @@ def test_pagar_divida_total_gera_um_pagamento_por_nota_no_mesmo_lote(cliente, us
 def test_pagar_divida_total_sobe_a_versao_das_notas_abatidas(cliente, usuario):
     antiga, media, nova = _tres_notas(cliente, usuario)
     versoes = (antiga.versao, nova.versao)
-    pagar_divida_total(cliente=cliente, valor=Decimal("50.00"), forma=PIX, usuario=usuario)
+    pagar_divida_total(cliente=cliente, valor=Decimal("50.00"), forma=PIX, usuario=usuario, divida_esperada=Decimal("160.00"))
     antiga.refresh_from_db()
     nova.refresh_from_db()
     assert antiga.versao == versoes[0] + 1
     assert nova.versao == versoes[1]
 
 
-@pytest.mark.parametrize("valor", ["160.01", "0", "-1"])
+@pytest.mark.parametrize("valor", ["160.01", "0", "-1", "0.004", "99.999", "NaN"])
 def test_pagar_divida_total_bloqueia_valor_invalido(cliente, usuario, valor):
     _tres_notas(cliente, usuario)
     with pytest.raises(ErroDeRegra):
-        pagar_divida_total(cliente=cliente, valor=Decimal(valor), forma=PIX, usuario=usuario)
+        pagar_divida_total(cliente=cliente, valor=Decimal(valor), forma=PIX, usuario=usuario, divida_esperada=Decimal("160.00"))
     assert Pagamento.objects.count() == 0
+
+
+def test_pagar_divida_total_rejeita_forma_invalida(cliente, usuario):
+    _tres_notas(cliente, usuario)
+    with pytest.raises(ErroDeRegra):
+        pagar_divida_total(cliente=cliente, valor=Decimal("100.00"), forma="CHEQUE", usuario=usuario, divida_esperada=Decimal("160.00"))
+    assert Pagamento.objects.count() == 0
+
+
+def test_pagar_divida_total_detecta_divida_alterada_no_outro_caixa(cliente, usuario):
+    antiga, media, nova = _tres_notas(cliente, usuario)
+    # First payment reduces debt from 160.00 to 150.00
+    _pagar(antiga, usuario, "10.00")
+    # Then try to pay with the old expected debt
+    with pytest.raises(ConflitoDeVersao):
+        pagar_divida_total(cliente=cliente, valor=Decimal("50.00"), forma=PIX, usuario=usuario, divida_esperada=Decimal("160.00"))
+    # Only the first payment should have been recorded
+    assert Pagamento.objects.count() == 1
+
+
+def test_pagar_divida_total_paga_dívida_total_exata(cliente, usuario):
+    antiga, media, nova = _tres_notas(cliente, usuario)
+    pagamentos = pagar_divida_total(
+        cliente=cliente, valor=Decimal("160.00"), forma=DINHEIRO, usuario=usuario, divida_esperada=Decimal("160.00")
+    )
+    assert len(pagamentos) == 3
+    antiga.refresh_from_db()
+    media.refresh_from_db()
+    nova.refresh_from_db()
+    assert antiga.situacao == S.QUITADA
+    assert media.situacao == S.ABERTA
+    assert media.saldo == Decimal("0.00")
+    assert nova.situacao == S.QUITADA

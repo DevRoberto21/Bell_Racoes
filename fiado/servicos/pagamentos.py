@@ -4,12 +4,24 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from fiado.erros import ErroDeRegra
+from fiado.erros import ConflitoDeVersao, ErroDeRegra
 from fiado.models import Nota, Pagamento
 from fiado.servicos.versao import gravar, quitar_se_zerou, travar
 
 S = Nota.Situacao
 ZERO = Decimal("0.00")
+
+
+def _validar(valor, forma):
+    """Valida forma e valor do pagamento."""
+    if forma not in Pagamento.Forma.values:
+        raise ErroDeRegra("Forma de pagamento inválida.")
+    if not valor.is_finite():
+        raise ErroDeRegra("Valor de pagamento inválido.")
+    if valor != valor.quantize(Decimal("0.01")):
+        raise ErroDeRegra("Valor de pagamento inválido.")
+    if valor <= ZERO:
+        raise ErroDeRegra("O valor do pagamento deve ser maior que zero.")
 
 
 def _lancar(nota, valor, forma, usuario, agora, lote=None):
@@ -24,13 +36,10 @@ def _lancar(nota, valor, forma, usuario, agora, lote=None):
 @transaction.atomic
 def registrar_pagamento(*, nota, versao, valor, forma, usuario, agora=None):
     agora = agora or timezone.now()
+    _validar(valor, forma)
     nota = travar(nota, versao)
     if not nota.em_divida:
         raise ErroDeRegra("Esta nota não recebe pagamento.")
-    if forma not in Pagamento.Forma.values:
-        raise ErroDeRegra("Forma de pagamento inválida.")
-    if valor <= ZERO:
-        raise ErroDeRegra("O valor do pagamento deve ser maior que zero.")
     if valor > nota.saldo:
         raise ErroDeRegra("O valor do pagamento é maior que o saldo da nota.")
     return _lancar(nota, valor, forma, usuario, agora)
@@ -57,12 +66,18 @@ def distribuir(cliente, valor):
 
 
 @transaction.atomic
-def pagar_divida_total(*, cliente, valor, forma, usuario, agora=None):
+def pagar_divida_total(*, cliente, valor, forma, usuario, divida_esperada, agora=None):
     agora = agora or timezone.now()
-    if forma not in Pagamento.Forma.values:
-        raise ErroDeRegra("Forma de pagamento inválida.")
-    if valor <= ZERO:
-        raise ErroDeRegra("O valor do pagamento deve ser maior que zero.")
+    _validar(valor, forma)
+
+    # Check if the debt has changed since the screen was shown
+    divida_atual = sum(
+        nota.saldo
+        for nota in cliente.notas.filter(situacao__in=[S.ABERTA, S.FECHADA])
+    )
+    if divida_atual != divida_esperada:
+        raise ConflitoDeVersao("A dívida deste cliente mudou no outro caixa. A tela foi atualizada; confira e repita.")
+
     partes, sobra = distribuir(cliente, valor)
     if sobra > ZERO:
         raise ErroDeRegra("O valor é maior que a dívida do cliente.")
