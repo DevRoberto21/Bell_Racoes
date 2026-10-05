@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Nota {{ nota.codigo }}{% endblock %}
+{% block conteudo %}
+<div id="nota-corpo">
+  <h1>Nota {{ nota.codigo }}{% if nota.editada %} <span class="selo">EDITADO</span>{% endif %}</h1>
+  <p>
+    <a href="{% url 'cliente' nota.cliente.codigo %}">{{ nota.cliente.codigo_formatado }} · {{ nota.cliente.nome }}</a>
+    · {{ nota.get_tipo_display }} · {{ nota.get_situacao_display }}
+    · {{ nota.criada_em|date:"d/m/Y" }} · {{ nota.dias_em_aberto }} dia(s)
+    {% if nota.editada %}· corrigida em {{ nota.editada_em|date:"d/m/Y H:i" }}{% endif %}
+  </p>
+
+  <table class="itens">
+    <thead>
+      <tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Preço</th><th class="num">Subtotal</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in itens %}
+      <tr>
+        <td>{{ item.descricao }}</td>
+        <td class="num">{{ item.quantidade|floatformat:"-3" }}</td>
+        <td class="num">{{ item.preco_unitario|floatformat:2 }}</td>
+        <td class="num">{{ item.subtotal|floatformat:2 }}</td>
+        <td></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Nenhum item.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagamentos %}
+  <table class="pagamentos">
+    <thead><tr><th>Pagamento em</th><th>Forma</th><th>Recebido por</th><th class="num">Valor</th></tr></thead>
+    <tbody>
+      {% for pagamento in pagamentos %}
+      <tr>
+        <td>{{ pagamento.recebido_em|date:"d/m/Y H:i" }}</td>
+        <td>{{ pagamento.get_forma_display }}</td>
+        <td>{{ pagamento.recebido_por.username }}</td>
+        <td class="num">{{ pagamento.valor|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <p class="totais">Total: R$ {{ total|floatformat:2 }} · Pago: R$ {{ total_pago|floatformat:2 }} · <strong>Saldo: R$ {{ saldo|floatformat:2 }}</strong></p>
+
+  <section class="acoes">
+  </section>
+</div>
+{% endblock %}

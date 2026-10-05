@@ -49,3 +49,7 @@ def test_filtro_por_nome_ou_apelido_sem_acento_nem_caixa():
     assert list(filtrar_clientes("jose")) == [jose]
     assert list(filtrar_clientes("ZÉ DO")) == [jose]
     assert filtrar_clientes("").count() == 2
+
+
+def test_digito_nao_ascii_vira_lista():
+    assert buscar("²").tipo == "lista"

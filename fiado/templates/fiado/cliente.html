@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}{{ cliente.nome }}{% endblock %}
+{% block conteudo %}
+<h1>{{ cliente.codigo_formatado }} · {{ cliente.nome }}{% if cliente.apelido %} ({{ cliente.apelido }}){% endif %}</h1>
+<p>{% if cliente.telefone %}{{ cliente.telefone }} · {% endif %}<a href="{% url 'editar_cliente' cliente.codigo %}">Editar cadastro</a></p>
+<p class="totais">Dívida: <strong>R$ {{ divida|floatformat:2 }}</strong></p>
+
+<section class="acoes">
+  <form method="post" action="{% url 'abrir_nota_do_cliente' cliente.codigo %}">
+    {% csrf_token %}
+    <label>Número da nota
+      <input name="numero" inputmode="numeric" autocomplete="off"{% if foco_nota %} autofocus{% endif %}>
+    </label>
+    <button>Abrir nota</button>
+  </form>
+  <form method="post" action="{% url 'nova_nota' cliente.codigo %}">
+    {% csrf_token %}
+    <button name="tipo" value="UNICA">Nova nota única</button>
+    <button name="tipo" value="CONTINUA"{% if tem_continua_aberta %} disabled{% endif %}>Nova nota contínua</button>
+  </form>
+</section>
+
+<h2>Notas em aberto</h2>
+<table>
+  <thead>
+    <tr><th>Código</th><th>Tipo</th><th>Situação</th><th>Criada em</th><th class="num">Dias</th><th class="num">Saldo (R$)</th></tr>
+  </thead>
+  <tbody>
+    {% for nota in notas %}
+    <tr>
+      <td><a href="{{ nota.get_absolute_url }}">{{ nota.codigo }}</a></td>
+      <td>{{ nota.get_tipo_display }}</td>
+      <td>{{ nota.get_situacao_display }}{% if nota.editada %} <span class="selo">EDITADO</span>{% endif %}</td>
+      <td>{{ nota.criada_em|date:"d/m/Y" }}</td>
+      <td class="num">{{ nota.dias_em_aberto }}</td>
+      <td class="num">{{ nota.saldo|floatformat:2 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Nenhuma nota em aberto.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if pode_excluir %}
+<form method="post" action="{% url 'excluir_cliente' cliente.codigo %}">
+  {% csrf_token %}
+  <button class="secundario">Excluir cliente</button>
+</form>
+{% endif %}
+{% endblock %}

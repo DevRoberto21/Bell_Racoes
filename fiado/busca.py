@@ -27,7 +27,7 @@ def buscar(texto):
         if nota:
             return ResultadoBusca("nota", objeto=nota, termo=termo)
         return ResultadoBusca("nao_encontrado", termo=termo, mensagem=f"Nota {termo} não existe.")
-    if termo.isdigit():
+    if termo.isascii() and termo.isdigit():
         cliente = Cliente.objects.filter(codigo=int(termo)).first()
         if cliente:
             return ResultadoBusca("cliente", objeto=cliente, termo=termo)

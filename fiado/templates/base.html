@@ -14,7 +14,12 @@
     {% if user.is_authenticated %}
     <nav>
       <a href="{% url 'painel' %}">Painel</a>
+      <a href="{% url 'clientes' %}">Clientes</a>
     </nav>
+    <form class="busca" action="{% url 'busca' %}" method="get">
+      <input name="q" value="{{ request.GET.q }}" autocomplete="off"
+             placeholder="Código (12 ou 12-03) ou nome" aria-label="Busca rápida">
+    </form>
     <form class="sair" method="post" action="{% url 'logout' %}">
       {% csrf_token %}
       <span>{{ user.username }}</span>
