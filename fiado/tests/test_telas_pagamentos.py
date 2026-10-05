@@ -49,6 +49,20 @@ def test_recibo_mostra_valor_forma_e_saldo_restante(logado, cliente, usuario):
     assert "Saldo restante" in html
     assert "60,00" in html
     assert 'href="/notas/1-1/"' in html
+    assert "Saldo restante da nota em " + timezone.localdate().strftime("%d/%m/%Y") in html
+
+
+def test_recibo_reaberto_mostra_saldo_atual_com_data(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    _pagar(logado, nota, "40,00")
+    primeiro = Pagamento.objects.get()
+    nota.refresh_from_db()
+    registrar_pagamento(
+        nota=nota, versao=nota.versao, valor=Decimal("10.00"), forma="DINHEIRO", usuario=usuario
+    )
+    html = logado.get(f"/recibos/{primeiro.id}/").content.decode()
+    assert "50,00" in html
+    assert "Saldo restante da nota em " + timezone.localdate().strftime("%d/%m/%Y") in html
 
 
 def test_pagamento_acima_do_saldo_mostra_erro(logado, cliente, usuario):
@@ -137,6 +151,7 @@ def test_recibo_do_lote_lista_as_notas_e_a_divida_restante(logado, cliente, usua
     assert "70,00" in html
     assert "60,00" in html
     assert 'href="/clientes/1/"' in html
+    assert "Saldo restante do cliente em " + timezone.localdate().strftime("%d/%m/%Y") in html
 
 
 def test_divida_total_acima_da_divida_mostra_erro(logado, cliente, usuario):

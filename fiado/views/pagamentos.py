@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
 from fiado import consultas
 from fiado.erros import ErroDeRegra
@@ -75,6 +76,7 @@ def _recibo(request, pagamentos, saldo_restante, rotulo_saldo, voltar):
         "saldo_restante": saldo_restante,
         "rotulo_saldo": rotulo_saldo,
         "voltar": voltar,
+        "emitido_em": timezone.now(),
     }
     return render(request, "fiado/impressao/recibo.html", contexto)
 

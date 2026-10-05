@@ -17,7 +17,7 @@
     <tr><td>Nota {{ pagamento.nota.codigo }}</td><td class="num">{{ pagamento.valor|floatformat:2 }}</td></tr>
     {% endfor %}
     <tr><th>VALOR PAGO</th><th class="num">R$ {{ total_pago|floatformat:2 }}</th></tr>
-    <tr><td>{{ rotulo_saldo }}</td><td class="num">R$ {{ saldo_restante|floatformat:2 }}</td></tr>
+    <tr><td>{{ rotulo_saldo }} em {{ emitido_em|date:"d/m/Y H:i" }}</td><td class="num">R$ {{ saldo_restante|floatformat:2 }}</td></tr>
   </table>
 </section>
 {% endblock %}
