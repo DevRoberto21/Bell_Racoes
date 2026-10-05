@@ -38,6 +38,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "fiado.middleware.BackupDiarioMiddleware",
 ]
 
 ROOT_URLCONF = "bellracoes.urls"
@@ -92,3 +93,7 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 LOJA_NOME = os.environ.get("BELL_LOJA_NOME", "Bell Rações")
 LOJA_ENDERECO = os.environ.get("BELL_LOJA_ENDERECO", "")
 LOJA_TELEFONE = os.environ.get("BELL_LOJA_TELEFONE", "")
+
+BACKUP_ATIVO = os.environ.get("BELL_BACKUP", "1") == "1"
+BACKUP_DIR = Path(os.environ.get("BELL_BACKUP_DIR", DATA_DIR / "backups"))
+BACKUP_MANTER = 30

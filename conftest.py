@@ -19,3 +19,8 @@ def cliente(db):
     from fiado.servicos.clientes import criar_cliente
 
     return criar_cliente(nome="Maria da Silva", apelido="Mariinha", telefone="85999990000")
+
+
+@pytest.fixture(autouse=True)
+def sem_backup(settings):
+    settings.BACKUP_ATIVO = False
