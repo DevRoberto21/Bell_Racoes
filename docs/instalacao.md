@@ -5,7 +5,7 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 ## Caixa 1 (servidor)
 
 1. Instale o `uv`: https://docs.astral.sh/uv/getting-started/installation/
-2. Copie a pasta do projeto para `C:\BellRacoes`.
+2. Copie a pasta do projeto para `C:\BellRacoes`. Copie tudo, menos as pastas `.venv` e `dados`. A pasta `dados` guarda o banco da loja: nunca copie outra por cima dela, nem ao atualizar o sistema.
 3. Abra o Prompt de Comando nessa pasta e rode:
 
    ```bat
@@ -51,6 +51,8 @@ O nome, o endereço e o telefone que saem na nota e no recibo ficam no começo d
 
 - Banco: `C:\BellRacoes\dados\bellracoes.sqlite3`.
 - Cópias de segurança: `C:\BellRacoes\dados\backups\`, uma por dia, últimas 30. Para gravar em outro lugar (pen drive, pasta do Google Drive), defina `BELL_BACKUP_DIR`. Para definir, acrescente uma linha `set BELL_BACKUP_DIR=E:\backups-bell` no `iniciar.bat`, junto das linhas da loja.
+- As cópias ficam, por padrão, no mesmo disco do banco. Se o disco estragar, perde-se tudo. Aponte `BELL_BACKUP_DIR` para um pen drive ou uma pasta sincronizada.
+- Se a cópia do dia falhar, o Painel mostra um aviso em vermelho.
 
 ### Como restaurar uma cópia
 
@@ -63,3 +65,14 @@ Faça isto só se o banco atual estiver perdido ou estragado. Tudo o que foi lan
 5. Abra a pasta `backups`, copie o arquivo do dia desejado (por exemplo `bellracoes-2026-10-05.sqlite3`) e cole na pasta `dados`.
 6. Renomeie a cópia colada para exatamente `bellracoes.sqlite3`.
 7. Abra o `iniciar.bat` de novo e confira as notas de um cliente conhecido.
+
+## Rede
+
+O sistema não tem proteção para rede aberta. Use só na rede interna da loja. Não libere a porta 8000 no roteador para a internet e não deixe os caixas na mesma rede Wi-Fi oferecida a clientes.
+
+## Antes de usar de verdade
+
+- [ ] Rodar o `iniciar.bat` no computador da loja.
+- [ ] Conferir se o nome da loja, com acentos, aparece certo numa nota impressa.
+- [ ] Imprimir uma nota e um recibo na impressora térmica.
+- [ ] Abrir o sistema a partir do caixa 2.

@@ -101,3 +101,11 @@ def test_pagas_recentes_mostra_so_os_ultimos_7_dias(cliente, usuario):
     pagas = list(consultas.notas_pagas_recentes(agora))
     assert [n.pk for n in pagas] == [recente.pk]
     assert Nota.objects.filter(pk=antiga.pk).exists()
+
+
+def test_rascunhos_lista_so_rascunhos_em_ordem(cliente, usuario):
+    primeiro = criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+    segundo = criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+    nota_unica_fechada(cliente, usuario, "10.00")
+    nota_continua_aberta(criar_cliente(nome="Outro"), usuario)
+    assert list(consultas.rascunhos()) == [primeiro, segundo]

@@ -43,6 +43,9 @@
     {% endfor %}
   </tbody>
 </table>
+{% if tem_rascunho %}
+<p>Rascunho ainda não é dívida: só entra na conta depois de finalizado.</p>
+{% endif %}
 
 {% if pode_excluir %}
 <form method="post" action="{% url 'excluir_cliente' cliente.codigo %}">

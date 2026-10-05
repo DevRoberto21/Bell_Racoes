@@ -1,7 +1,7 @@
 import getpass
 
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 CAIXAS = [("caixa1", "Flávia", "senha1"), ("caixa2", "Marcineide", "senha2")]
 
@@ -17,6 +17,8 @@ class Command(BaseCommand):
         Usuario = get_user_model()
         for nome_de_usuario, nome, chave in CAIXAS:
             senha = opcoes[chave] or getpass.getpass(f"Senha para {nome_de_usuario} ({nome}): ")
+            if not senha.strip():
+                raise CommandError("A senha não pode ficar em branco.")
             usuario, _ = Usuario.objects.get_or_create(username=nome_de_usuario)
             usuario.first_name = nome
             usuario.set_password(senha)

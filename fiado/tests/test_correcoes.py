@@ -133,3 +133,27 @@ def test_correcao_com_versao_antiga_e_recusada(cliente, usuario):
         corrigir_nota(
             nota=nota, versao=versao_antiga, itens=_itens(("A", "90.00")), usuario=usuario
         )
+
+
+def test_correcao_com_item_que_arredonda_para_zero_e_recusada(cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, valor="100.00")
+    itens = [
+        {"descricao": "Grão", "quantidade": Decimal("0.001"), "preco_unitario": Decimal("0.01")}
+    ]
+    with pytest.raises(ErroDeRegra, match="O valor do item não pode ser zero."):
+        corrigir_nota(nota=nota, versao=nota.versao, itens=itens, usuario=usuario)
+    nota.refresh_from_db()
+    assert nota.editada is False
+    assert nota.total == Decimal("100.00")
+    assert not nota.correcoes.exists()
+
+
+def test_correcao_sem_alteracao_e_recusada(cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, valor="100.00")
+    with pytest.raises(ErroDeRegra, match="Nenhuma alteração foi feita na nota."):
+        corrigir_nota(
+            nota=nota, versao=nota.versao, itens=_itens(("  Ração 15kg ", "100.00")), usuario=usuario
+        )
+    nota.refresh_from_db()
+    assert nota.editada is False
+    assert not nota.correcoes.exists()

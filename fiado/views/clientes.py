@@ -7,10 +7,11 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from fiado import consultas
-from fiado.busca import buscar, filtrar_clientes
+from fiado.busca import buscar, e_numero, filtrar_clientes
 from fiado.erros import ErroDeRegra
 from fiado.forms import ClienteForm
 from fiado.models import Cliente, Nota
+from fiado.servicos import clientes as servico_clientes
 from fiado.servicos.clientes import criar_cliente, excluir_cliente
 from fiado.servicos.notas import criar_nota
 
@@ -42,16 +43,18 @@ def editar_cliente(request, codigo):
     cliente = get_object_or_404(Cliente, codigo=codigo)
     form = ClienteForm(request.POST or None, instance=cliente)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        servico_clientes.editar_cliente(cliente, **form.cleaned_data)
         return redirect("cliente", cliente.codigo)
     return render(request, "fiado/cliente_form.html", {"form": form, "titulo": "Editar cliente"})
 
 
 def registro_cliente(request, codigo):
     cliente = get_object_or_404(Cliente, codigo=codigo)
+    notas = list(consultas.notas_em_aberto(cliente))
     contexto = {
         "cliente": cliente,
-        "notas": consultas.notas_em_aberto(cliente),
+        "notas": notas,
+        "tem_rascunho": any(n.situacao == Nota.Situacao.RASCUNHO for n in notas),
         "divida": consultas.divida_do_cliente(cliente),
         "tem_continua_aberta": cliente.notas.filter(
             tipo=Nota.Tipo.CONTINUA, situacao=Nota.Situacao.ABERTA
@@ -77,10 +80,11 @@ def excluir_cliente_view(request, codigo):
 def abrir_nota_do_cliente(request, codigo):
     cliente = get_object_or_404(Cliente, codigo=codigo)
     numero = request.POST.get("numero", "").strip()
-    e_numero = numero.isascii() and numero.isdigit()
-    if e_numero and cliente.notas.filter(numero=int(numero)).exists():
+    if numero.isascii() and numero.isdigit() and not e_numero(numero):
+        messages.error(request, f"Nota {numero[:12]} não existe.")
+    elif e_numero(numero) and cliente.notas.filter(numero=int(numero)).exists():
         return redirect("nota", cliente.codigo, int(numero))
-    if e_numero:
+    elif e_numero(numero):
         messages.error(request, f"Nota {cliente.codigo:02d}-{int(numero):02d} não existe.")
     else:
         messages.error(request, "Digite o número da nota.")

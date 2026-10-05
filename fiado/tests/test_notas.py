@@ -177,3 +177,17 @@ def test_versao_invalida_e_tratada_como_conflito(cliente, usuario):
     nota = criar_nota(cliente=cliente, tipo=T.UNICA, usuario=usuario)
     with pytest.raises(ConflitoDeVersao):
         finalizar_nota(nota=nota, versao="abc")
+
+
+def test_item_que_arredonda_para_zero_e_recusado(cliente, usuario):
+    nota = criar_nota(cliente=cliente, tipo=T.UNICA, usuario=usuario)
+    with pytest.raises(ErroDeRegra, match="O valor do item não pode ser zero."):
+        adicionar_item(
+            nota=nota,
+            versao=nota.versao,
+            descricao="Grão",
+            quantidade=Decimal("0.001"),
+            preco_unitario=Decimal("0.01"),
+            usuario=usuario,
+        )
+    assert not nota.itens.exists()

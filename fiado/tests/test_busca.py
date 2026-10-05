@@ -53,3 +53,18 @@ def test_filtro_por_nome_ou_apelido_sem_acento_nem_caixa():
 
 def test_digito_nao_ascii_vira_lista():
     assert buscar("²").tipo == "lista"
+
+
+def test_numero_gigante_vira_texto(cliente):
+    assert buscar("9" * 5000).tipo == "lista"
+    assert buscar("1-" + "9" * 5000).tipo == "lista"
+    assert buscar("9" * 5000 + "-1").tipo == "lista"
+
+
+def test_e_numero():
+    from fiado.busca import e_numero
+
+    assert e_numero("123456789")
+    assert not e_numero("1234567890")
+    assert not e_numero("")
+    assert not e_numero("١٢٣")

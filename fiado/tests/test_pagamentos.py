@@ -99,7 +99,7 @@ def test_distribuir_vai_da_mais_antiga_para_a_mais_recente(cliente, usuario):
         (media.pk, Decimal("50.00")),
     ]
     assert sobra == Decimal("0.00")
-    # Total debt from _tres_notas is 50.00 + 80.00 + 30.00 = 160.00
+    # A dívida de _tres_notas é 50,00 + 80,00 + 30,00 = 160,00
 
 
 def test_distribuir_ignora_rascunho_e_nota_sem_saldo(cliente, usuario):
@@ -159,16 +159,16 @@ def test_pagar_divida_total_rejeita_forma_invalida(cliente, usuario):
 
 def test_pagar_divida_total_detecta_divida_alterada_no_outro_caixa(cliente, usuario):
     antiga, media, nova = _tres_notas(cliente, usuario)
-    # First payment reduces debt from 160.00 to 150.00
+    # O primeiro pagamento reduz a dívida de 160,00 para 150,00
     _pagar(antiga, usuario, "10.00")
-    # Then try to pay with the old expected debt
+    # Depois tenta pagar com a dívida antiga
     with pytest.raises(ConflitoDeVersao):
         pagar_divida_total(cliente=cliente, valor=Decimal("50.00"), forma=PIX, usuario=usuario, divida_esperada=Decimal("160.00"))
-    # Only the first payment should have been recorded
+    # Só o primeiro pagamento foi gravado
     assert Pagamento.objects.count() == 1
 
 
-def test_pagar_divida_total_paga_dívida_total_exata(cliente, usuario):
+def test_pagar_divida_total_paga_a_divida_exata(cliente, usuario):
     antiga, media, nova = _tres_notas(cliente, usuario)
     pagamentos = pagar_divida_total(
         cliente=cliente, valor=Decimal("160.00"), forma=DINHEIRO, usuario=usuario, divida_esperada=Decimal("160.00")

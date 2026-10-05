@@ -51,9 +51,9 @@ def pagar_divida(request, codigo):
                 return redirect("recibo_lote", pagamentos[0].lote)
         else:
             messages.error(request, "Confira o valor e a forma de pagamento.")
-        valor = form.cleaned_data.get("valor", divida) if hasattr(form, "cleaned_data") else divida
+        valor = form.cleaned_data.get("valor", divida)
     else:
-        form = DividaTotalForm(initial={"valor": divida})
+        form = DividaTotalForm()
         valor = divida
     contexto = {"cliente": cliente, "divida": divida, "form": form} | _previa(cliente, valor)
     return render(request, "fiado/pagar_divida.html", contexto)

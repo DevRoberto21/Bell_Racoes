@@ -2,7 +2,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from fiado.erros import ErroDeRegra
-from fiado.models import Cliente, ItemNota, Nota
+from fiado.models import Cliente, ItemNota, Nota, subtotal_de
 from fiado.servicos.versao import gravar, quitar_se_zerou, travar
 
 S, T = Nota.Situacao, Nota.Tipo
@@ -36,6 +36,8 @@ def adicionar_item(*, nota, versao, descricao, quantidade, preco_unitario, usuar
         raise ErroDeRegra("Informe a descrição do item.")
     if quantidade <= 0 or preco_unitario <= 0:
         raise ErroDeRegra("Quantidade e preço devem ser maiores que zero.")
+    if subtotal_de(quantidade, preco_unitario) == 0:
+        raise ErroDeRegra("O valor do item não pode ser zero.")
     ItemNota.objects.create(
         nota=nota,
         descricao=descricao,

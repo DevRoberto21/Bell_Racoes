@@ -189,3 +189,14 @@ def test_todas_as_linhas_em_branco_nao_esvazia_a_nota(logado, cliente, usuario):
     nota.refresh_from_db()
     assert nota.editada is False
     assert nota.itens.count() == 1
+
+
+def test_correcao_sem_mudanca_mostra_aviso(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    resposta = logado.post(
+        "/notas/1-1/correcao/", _formulario(nota, [_linha("Ração 15kg", "100,00")], iniciais=1)
+    )
+    assert resposta.status_code == 200
+    assert "Nenhuma alteração foi feita na nota." in resposta.content.decode()
+    nota.refresh_from_db()
+    assert nota.editada is False

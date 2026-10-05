@@ -68,7 +68,7 @@ DATABASES = {
         "OPTIONS": {
             "timeout": 20,
             "transaction_mode": "IMMEDIATE",
-            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;",
         },
     }
 }

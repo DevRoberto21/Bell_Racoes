@@ -58,3 +58,8 @@ def backup_do_dia(origem=None, dia=None):
         destino = fazer_backup(origem or settings.DATABASES["default"]["NAME"], pasta, dia)
         limpar_antigos(pasta, settings.BACKUP_MANTER)
     return destino
+
+
+def copia_de_hoje_existe(dia=None):
+    dia = dia or timezone.localdate()
+    return (Path(settings.BACKUP_DIR) / _nome(dia)).exists()

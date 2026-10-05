@@ -2,6 +2,9 @@
 {% block titulo %}Painel{% endblock %}
 {% block conteudo %}
 <h1>Painel</h1>
+{% if backup_falhou %}
+<p class="mensagem error">A cópia de segurança de hoje não foi feita. Confira a pasta de cópias e avise o responsável.</p>
+{% endif %}
 <p class="totais">Total de fiado em aberto: <strong>R$ {{ total_em_aberto|floatformat:2 }}</strong></p>
 <h2>Notas atrasadas</h2>
 <table>
@@ -23,4 +26,22 @@
     {% endfor %}
   </tbody>
 </table>
+{% if rascunhos %}
+<h2>Rascunhos não finalizados</h2>
+<table>
+  <thead>
+    <tr><th>Nota</th><th>Cliente</th><th>Criada em</th><th class="num">Total (R$)</th></tr>
+  </thead>
+  <tbody>
+    {% for nota in rascunhos %}
+    <tr>
+      <td><a href="{{ nota.get_absolute_url }}">{{ nota.codigo }}</a></td>
+      <td><a href="{% url 'cliente' nota.cliente.codigo %}">{{ nota.cliente.nome }}</a></td>
+      <td>{{ nota.criada_em|date:"d/m/Y" }}</td>
+      <td class="num">{{ nota.total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
 {% endblock %}

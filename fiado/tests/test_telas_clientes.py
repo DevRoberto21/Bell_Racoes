@@ -133,3 +133,21 @@ def test_nota_inexistente_e_404(logado, cliente):
 def test_telas_exigem_login(client, cliente):
     for caminho in ["/clientes/", "/clientes/1/", "/busca/?q=1"]:
         assert client.get(caminho)["Location"].startswith("/entrar/")
+
+
+FRASE_RASCUNHO = "Rascunho ainda não é dívida: só entra na conta depois de finalizado."
+
+
+def test_registro_do_cliente_explica_o_rascunho(logado, cliente, usuario):
+    criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+    assert FRASE_RASCUNHO in logado.get("/clientes/1/").content.decode()
+
+
+def test_registro_do_cliente_sem_rascunho_nao_explica(logado, cliente, usuario):
+    nota_unica_fechada(cliente, usuario, "10.00")
+    assert FRASE_RASCUNHO not in logado.get("/clientes/1/").content.decode()
+
+
+def test_numero_de_nota_gigante_nao_quebra(logado, cliente):
+    resposta = logado.post("/clientes/1/nota/", {"numero": "9" * 5000})
+    assert resposta.status_code == 302

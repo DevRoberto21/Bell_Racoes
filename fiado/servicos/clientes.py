@@ -22,3 +22,13 @@ def excluir_cliente(cliente):
     if cliente.notas.exists():
         raise ErroDeRegra("Cliente com nota não pode ser excluído.")
     cliente.delete()
+
+
+@transaction.atomic
+def editar_cliente(cliente, *, nome, apelido="", telefone=""):
+    cliente = Cliente.objects.get(pk=cliente.pk)
+    cliente.nome = nome.strip()
+    cliente.apelido = apelido.strip()
+    cliente.telefone = telefone.strip()
+    cliente.save(update_fields=["nome", "apelido", "telefone", "texto_busca"])
+    return cliente

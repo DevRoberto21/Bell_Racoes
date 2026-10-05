@@ -10,6 +10,10 @@ from django.utils import timezone
 CENTAVO = Decimal("0.01")
 
 
+def subtotal_de(quantidade, preco_unitario):
+    return (quantidade * preco_unitario).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+
+
 def normalizar(texto):
     """Minúsculas, sem acento e sem espaço sobrando. Usado em busca e ordenação."""
     sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode()
@@ -142,9 +146,7 @@ class ItemNota(models.Model):
         ordering = ["adicionado_em", "id"]
 
     def save(self, *args, **kwargs):
-        self.subtotal = (self.quantidade * self.preco_unitario).quantize(
-            CENTAVO, rounding=ROUND_HALF_UP
-        )
+        self.subtotal = subtotal_de(self.quantidade, self.preco_unitario)
         super().save(*args, **kwargs)
 
 

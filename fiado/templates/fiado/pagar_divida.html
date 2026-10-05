@@ -3,7 +3,7 @@
 {% block conteudo %}
 <h1>Pagar dívida total</h1>
 <p><a href="{% url 'cliente' cliente.codigo %}">{{ cliente.codigo_formatado }} · {{ cliente.nome }}</a> · Dívida: <strong>R$ {{ divida|floatformat:2 }}</strong></p>
-<form method="post">
+<form method="post" x-data="{ enviando: false }" @submit="enviando = true">
   {% csrf_token %}
   <input type="hidden" name="divida" value="{{ divida|floatformat:2 }}">
   <label>Valor
@@ -14,7 +14,7 @@
   <label>Forma {{ form.forma }}</label>
   <p>O valor abate as notas da mais antiga para a mais recente:</p>
   {% include "fiado/_previa_divida.html" %}
-  <button>Confirmar pagamento</button>
+  <button :disabled="enviando">Confirmar pagamento</button>
   <a class="botao secundario" href="{% url 'cliente' cliente.codigo %}">Cancelar</a>
 </form>
 {% endblock %}

@@ -6,7 +6,8 @@
   <p>
     <a href="{% url 'cliente' nota.cliente.codigo %}">{{ nota.cliente.codigo_formatado }} · {{ nota.cliente.nome }}</a>
     · {{ nota.get_tipo_display }} · {{ nota.get_situacao_display }}
-    · {{ nota.criada_em|date:"d/m/Y" }} · {{ nota.dias_em_aberto }} dia(s)
+    · {{ nota.criada_em|date:"d/m/Y" }}
+    {% if nota.situacao == "QUITADA" %}· quitada em {{ nota.quitada_em|date:"d/m/Y" }}{% else %}· {{ nota.dias_em_aberto }} dia(s){% endif %}
     {% if nota.editada %}· corrigida em {{ nota.editada_em|date:"d/m/Y H:i" }}{% endif %}
   </p>
 
@@ -23,7 +24,8 @@
         <td class="num">{{ item.subtotal|floatformat:2 }}</td>
         <td>
           {% if nota.situacao == "RASCUNHO" %}
-          <form method="post" action="{% url 'remover_item' nota.cliente.codigo nota.numero item.id %}">
+          <form method="post" action="{% url 'remover_item' nota.cliente.codigo nota.numero item.id %}"
+                onsubmit="return confirm('Remover este item?')">
             {% csrf_token %}
             <input type="hidden" name="versao" value="{{ nota.versao }}">
             <button class="secundario">Remover</button>
@@ -53,7 +55,7 @@
 
   {% if pagamentos %}
   <table class="pagamentos">
-    <thead><tr><th>Pagamento em</th><th>Forma</th><th>Recebido por</th><th class="num">Valor</th></tr></thead>
+    <thead><tr><th>Pagamento em</th><th>Forma</th><th>Recebido por</th><th class="num">Valor</th><th></th></tr></thead>
     <tbody>
       {% for pagamento in pagamentos %}
       <tr>
@@ -61,6 +63,7 @@
         <td>{{ pagamento.get_forma_display }}</td>
         <td>{{ pagamento.recebido_por.username }}</td>
         <td class="num">{{ pagamento.valor|floatformat:2 }}</td>
+        <td><a href="{% if pagamento.lote %}{% url 'recibo_lote' pagamento.lote %}{% else %}{% url 'recibo' pagamento.id %}{% endif %}">Recibo</a></td>
       </tr>
       {% endfor %}
     </tbody>
@@ -71,10 +74,11 @@
 
   <section class="acoes">
     {% if nota.em_divida and saldo > 0 %}
-    <div x-data="{ aberto: false }">
+    <div x-data="{ aberto: false, enviando: false }">
       <button type="button" @click="aberto = true">Pagamento</button>
       <div class="janela" x-show="aberto" x-cloak @keydown.escape.window="aberto = false">
-        <form method="post" action="{% url 'pagamento' nota.cliente.codigo nota.numero %}">
+        <form method="post" action="{% url 'pagamento' nota.cliente.codigo nota.numero %}"
+              @submit="enviando = true">
           {% csrf_token %}
           <input type="hidden" name="versao" value="{{ nota.versao }}">
           <h2>Pagamento da nota {{ nota.codigo }}</h2>
@@ -85,7 +89,7 @@
             </select>
           </label>
           <p>
-            <button>Confirmar pagamento</button>
+            <button :disabled="enviando">Confirmar pagamento</button>
             <button type="button" class="secundario" @click="aberto = false">Cancelar</button>
           </p>
         </form>
@@ -113,7 +117,8 @@
     <a class="botao secundario" href="{% url 'imprimir_nota' nota.cliente.codigo nota.numero %}">Reimprimir</a>
     {% endif %}
     {% if nota.situacao == "RASCUNHO" or nota.situacao == "ABERTA" and not itens and not pagamentos %}
-    <form method="post" action="{% url 'descartar_nota' nota.cliente.codigo nota.numero %}">
+    <form method="post" action="{% url 'descartar_nota' nota.cliente.codigo nota.numero %}"
+          onsubmit="return confirm('Descartar esta nota? Não dá para desfazer.')">
       {% csrf_token %}
       <input type="hidden" name="versao" value="{{ nota.versao }}">
       <button class="secundario">Descartar</button>

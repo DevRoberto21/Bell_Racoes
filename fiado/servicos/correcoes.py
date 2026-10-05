@@ -2,7 +2,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from fiado.erros import ErroDeRegra
-from fiado.models import CorrecaoNota, ItemNota
+from fiado.models import CorrecaoNota, ItemNota, subtotal_de
 from fiado.servicos.versao import gravar, quitar_se_zerou, travar
 
 
@@ -27,6 +27,13 @@ def corrigir_nota(*, nota, versao, itens, usuario, agora=None):
     for item in itens:
         if not item["descricao"].strip() or item["quantidade"] <= 0 or item["preco_unitario"] <= 0:
             raise ErroDeRegra("Todo item precisa de descrição, quantidade e preço maiores que zero.")
+        if subtotal_de(item["quantidade"], item["preco_unitario"]) == 0:
+            raise ErroDeRegra("O valor do item não pode ser zero.")
+
+    atuais = [(i.descricao, i.quantidade, i.preco_unitario) for i in nota.itens.all()]
+    novos = [(i["descricao"].strip(), i["quantidade"], i["preco_unitario"]) for i in itens]
+    if atuais == novos:
+        raise ErroDeRegra("Nenhuma alteração foi feita na nota.")
 
     correcao = CorrecaoNota.objects.create(
         nota=nota,

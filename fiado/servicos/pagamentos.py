@@ -70,7 +70,7 @@ def pagar_divida_total(*, cliente, valor, forma, usuario, divida_esperada, agora
     agora = agora or timezone.now()
     _validar(valor, forma)
 
-    # Check if the debt has changed since the screen was shown
+    # A dívida pode ter mudado no outro caixa depois que a tela foi mostrada
     divida_atual = sum(
         nota.saldo
         for nota in cliente.notas.filter(situacao__in=[S.ABERTA, S.FECHADA])

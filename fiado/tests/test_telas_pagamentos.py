@@ -183,3 +183,59 @@ def test_divida_alterada_no_outro_caixa_bloqueia_e_atualiza_a_tela(logado, clien
 def test_recibo_inexistente_e_404(logado):
     assert logado.get("/recibos/999/").status_code == 404
     assert logado.get("/recibos/lote/00000000-0000-0000-0000-000000000000/").status_code == 404
+
+
+def test_nota_tem_link_de_recibo_do_pagamento(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    _pagar(logado, nota, "40,00")
+    pagamento = Pagamento.objects.get()
+    html = logado.get("/notas/1-1/").content.decode()
+    assert f'href="/recibos/{pagamento.id}/"' in html
+
+
+def test_nota_tem_link_de_recibo_do_lote(logado, cliente, usuario):
+    _duas_notas(cliente, usuario)
+    logado.post("/clientes/1/pagar/", {"valor": "70,00", "forma": "PIX", "divida": "130,00"})
+    lote = Pagamento.objects.first().lote
+    html = logado.get("/notas/1-1/").content.decode()
+    assert f'href="/recibos/lote/{lote}/"' in html
+
+
+def test_janela_de_pagamento_desabilita_o_botao_ao_enviar(logado, cliente, usuario):
+    nota_unica_fechada(cliente, usuario, "100.00")
+    html = logado.get("/notas/1-1/").content.decode()
+    assert ':disabled="enviando"' in html
+    assert '@submit="enviando = true"' in html
+
+
+def test_tela_de_divida_total_desabilita_o_botao_ao_enviar(logado, cliente, usuario):
+    _duas_notas(cliente, usuario)
+    html = logado.get("/clientes/1/pagar/").content.decode()
+    assert ':disabled="enviando"' in html
+    assert '@submit="enviando = true"' in html
+
+
+def test_nota_rascunho_pede_confirmacao_para_descartar_e_remover(logado, cliente, usuario):
+    from fiado.servicos.notas import adicionar_item, criar_nota
+
+    nota = criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+    adicionar_item(
+        nota=nota,
+        versao=nota.versao,
+        descricao="Ração",
+        quantidade=Decimal("1"),
+        preco_unitario=Decimal("10"),
+        usuario=usuario,
+    )
+    html = logado.get("/notas/1-1/").content.decode()
+    assert "onsubmit=\"return confirm('Descartar esta nota? Não dá para desfazer.')\"" in html
+    assert "onsubmit=\"return confirm('Remover este item?')\"" in html
+
+
+def test_nota_quitada_mostra_data_de_quitacao_e_nao_dias(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    _pagar(logado, nota, "100,00")
+    nota.refresh_from_db()
+    html = logado.get("/notas/1-1/").content.decode()
+    assert "quitada em " + timezone.localtime(nota.quitada_em).strftime("%d/%m/%Y") in html
+    assert "dia(s)" not in html

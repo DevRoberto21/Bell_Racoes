@@ -69,3 +69,9 @@ def notas_pagas_recentes(agora=None):
         .select_related("cliente")
         .order_by("-quitada_em")
     )
+
+
+def rascunhos():
+    return Nota.objects.filter(situacao=S.RASCUNHO).select_related("cliente").order_by(
+        "criada_em", "numero"
+    )
