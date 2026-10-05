@@ -18,6 +18,9 @@
     <button name="tipo" value="UNICA">Nova nota única</button>
     <button name="tipo" value="CONTINUA"{% if tem_continua_aberta %} disabled{% endif %}>Nova nota contínua</button>
   </form>
+  {% if divida > 0 %}
+  <a class="botao" href="{% url 'pagar_divida' cliente.codigo %}">Pagar dívida total</a>
+  {% endif %}
 </section>
 
 <h2>Notas em aberto</h2>

@@ -1,0 +1,23 @@
+{% extends "fiado/impressao/base.html" %}
+{% block titulo %}Recibo{% endblock %}
+{% block conteudo %}
+<section class="via">
+  <h1>{{ loja.nome }}</h1>
+  {% if loja.endereco %}<div class="centro">{{ loja.endereco }}</div>{% endif %}
+  {% if loja.telefone %}<div class="centro">{{ loja.telefone }}</div>{% endif %}
+  <div class="linha"></div>
+  <div class="centro">RECIBO DE PAGAMENTO</div>
+  <div>Cliente: {{ cliente.codigo_formatado }} · {{ cliente.nome }}</div>
+  <div>Data: {{ primeiro.recebido_em|date:"d/m/Y H:i" }}</div>
+  <div>Forma: {{ primeiro.get_forma_display }}</div>
+  <div>Recebido por: {{ primeiro.recebido_por.username }}</div>
+  <div class="linha"></div>
+  <table>
+    {% for pagamento in pagamentos %}
+    <tr><td>Nota {{ pagamento.nota.codigo }}</td><td class="num">{{ pagamento.valor|floatformat:2 }}</td></tr>
+    {% endfor %}
+    <tr><th>VALOR PAGO</th><th class="num">R$ {{ total_pago|floatformat:2 }}</th></tr>
+    <tr><td>{{ rotulo_saldo }}</td><td class="num">R$ {{ saldo_restante|floatformat:2 }}</td></tr>
+  </table>
+</section>
+{% endblock %}

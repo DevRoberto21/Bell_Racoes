@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Pagar dívida · {{ cliente.nome }}{% endblock %}
+{% block conteudo %}
+<h1>Pagar dívida total</h1>
+<p><a href="{% url 'cliente' cliente.codigo %}">{{ cliente.codigo_formatado }} · {{ cliente.nome }}</a> · Dívida: <strong>R$ {{ divida|floatformat:2 }}</strong></p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="divida" value="{{ divida|floatformat:2 }}">
+  <label>Valor
+    <input name="valor" value="{{ valor|floatformat:2 }}" inputmode="decimal" required autofocus
+           hx-get="{% url 'previa_divida' cliente.codigo %}" hx-trigger="input changed delay:300ms"
+           hx-target="#previa" hx-swap="outerHTML">
+  </label>
+  <label>Forma {{ form.forma }}</label>
+  <p>O valor abate as notas da mais antiga para a mais recente:</p>
+  {% include "fiado/_previa_divida.html" %}
+  <button>Confirmar pagamento</button>
+  <a class="botao secundario" href="{% url 'cliente' cliente.codigo %}">Cancelar</a>
+</form>
+{% endblock %}
