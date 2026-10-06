@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from fiado.api.http import api, erro
-from fiado.api.validacao import texto
+from fiado.api.validacao import senha, texto
 
 
 def _usuario_json(usuario):
@@ -22,7 +22,7 @@ def entrar(request):
     usuario = authenticate(
         request,
         username=texto(request.dados, "usuario", 150),
-        password=texto(request.dados, "senha", 200),
+        password=senha(request.dados, "senha"),
     )
     if usuario is None:
         return erro("Usuário ou senha incorretos.", 400)

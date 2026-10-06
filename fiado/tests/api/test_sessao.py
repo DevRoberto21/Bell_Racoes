@@ -38,3 +38,11 @@ def test_escrita_sem_csrf_e_recusada(usuario):
     assert cliente_http.post("/api/sair", **JSON).status_code == 403
     token = cliente_http.get("/api/sessao").cookies["csrftoken"].value
     assert cliente_http.post("/api/sair", HTTP_X_CSRFTOKEN=token, **JSON).status_code == 200
+
+
+def test_entrar_com_senha_com_espacos_nas_pontas(client, django_user_model):
+    django_user_model.objects.create_user("caixa2", password="  com espaços  ")
+    resposta = client.post("/api/entrar", {"usuario": "caixa2", "senha": "  com espaços  "}, **JSON)
+    assert resposta.status_code == 200
+    resposta = client.post("/api/entrar", {"usuario": "caixa2", "senha": "com espaços"}, **JSON)
+    assert resposta.status_code == 400

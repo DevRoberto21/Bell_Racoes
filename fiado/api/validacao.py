@@ -46,3 +46,15 @@ def lista(dados, campo):
     if not isinstance(valor, list):
         _falha(campo, "Lista inválida.")
     return valor
+
+
+def senha(dados, campo, maximo=200):
+    """Senha exatamente como digitada: nunca aparada."""
+    valor = dados.get(campo, "")
+    if not isinstance(valor, str):
+        _falha(campo, "Valor inválido.")
+    if not valor:
+        _falha(campo, "Preencha este campo.")
+    if len(valor) > maximo:
+        _falha(campo, f"Use no máximo {maximo} caracteres.")
+    return valor

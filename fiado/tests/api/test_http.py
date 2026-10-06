@@ -6,7 +6,7 @@ from django.http import Http404
 from django.test import RequestFactory
 
 from fiado.api.http import api
-from fiado.api.validacao import DadosInvalidos, decimal, lista, opcao, texto
+from fiado.api.validacao import DadosInvalidos, decimal, lista, opcao, senha, texto
 from fiado.erros import ConflitoDeVersao, ErroDeRegra
 
 pytestmark = pytest.mark.django_db
@@ -134,3 +134,11 @@ def test_opcao_e_lista():
     assert lista({"itens": [1]}, "itens") == [1]
     with pytest.raises(DadosInvalidos):
         lista({"itens": "x"}, "itens")
+
+
+def test_senha_nao_e_aparada():
+    assert senha({"s": "  x  "}, "s") == "  x  "
+    for dados in ({}, {"s": ""}, {"s": 5}, {"s": "x" * 201}):
+        with pytest.raises(DadosInvalidos) as erro:
+            senha(dados, "s")
+        assert "s" in erro.value.campos
