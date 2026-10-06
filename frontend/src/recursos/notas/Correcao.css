@@ -1,0 +1,22 @@
+.correcao { display: flex; flex-direction: column; gap: var(--espaco-3); }
+
+.correcao__titulo { font-size: var(--texto-corpo); font-weight: 650; color: var(--cor-texto-secundario); }
+
+.correcao__linhas { display: flex; flex-direction: column; gap: var(--espaco-2); }
+
+/* Mesmas colunas da linha de novo item: descrição, quantidade e preço. */
+.correcao__linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 11ch 12ch;
+  align-items: start;
+  gap: var(--espaco-2);
+}
+
+.correcao__rotulos { font-size: var(--texto-pequeno); font-weight: 600; color: var(--cor-texto-secundario); }
+
+.correcao__campo { display: flex; flex-direction: column; gap: var(--espaco-1); min-width: 0; }
+.correcao__campo .campo__entrada { width: 100%; min-width: 0; }
+
+.correcao__adicionar { align-self: flex-start; }
+
+.correcao__acoes { display: flex; justify-content: flex-end; gap: var(--espaco-2); }

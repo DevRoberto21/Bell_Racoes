@@ -1,0 +1,22 @@
+/* Fica preso ao pé da área rolável da gaveta, por cima dos itens. */
+.receber {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.receber__campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espaco-3);
+}
+.receber__campos .campo__entrada { width: 100%; min-width: 0; }
+
+.receber__acoes { display: flex; justify-content: flex-end; gap: var(--espaco-2); }

@@ -12,18 +12,22 @@ import { Gaveta } from "../../componentes/Gaveta";
 import { Selo } from "../../componentes/Selo";
 import { tempoBaseMs } from "../../estilo/tempo";
 import { useNotaAberta } from "./abrirNota";
+import { Correcao } from "./Correcao";
 import { abrirImpressao } from "./imprimir";
 import { ItensDaNota } from "./ItensDaNota";
 import { LinhaNovoItem } from "./LinhaNovoItem";
 import {
   tratarErroDeNota,
   useAdicionarItem,
+  useCorrigir,
   useDescartar,
   useFechar,
   useFinalizar,
   useNota,
+  useReceber,
   useRemoverItem,
 } from "./notas";
+import { Receber } from "./Receber";
 import { ResumoDaNota } from "./ResumoDaNota";
 import "./GavetaDaNota.css";
 
@@ -85,16 +89,34 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
   const finalizar = useFinalizar(codigo);
   const fecharNota = useFechar(codigo);
   const descartar = useDescartar(codigo);
+  const receber = useReceber(codigo);
+  const corrigir = useCorrigir(codigo);
   const gravando =
-    adicionar.isPending || remover.isPending || finalizar.isPending || fecharNota.isPending || descartar.isPending;
+    adicionar.isPending ||
+    remover.isPending ||
+    finalizar.isPending ||
+    fecharNota.isPending ||
+    descartar.isPending ||
+    receber.isPending ||
+    corrigir.isPending;
 
   const [falha, setFalha] = useState<string | null>(null);
   const [itemARemover, setItemARemover] = useState<ItemNota | null>(null);
   const [confirmandoDescarte, setConfirmandoDescarte] = useState(false);
-  // Receber e Correção: o conteúdo de cada modo chega na próxima tarefa.
+  // Em "receber" e "corrigir" o formulário do modo toma o lugar das ações do rodapé.
   const [modo, setModo] = useState<"ver" | "receber" | "corrigir">("ver");
 
   const falhar = (erro: unknown) => setFalha(tratarErroDeNota(clienteDeConsulta, erro, codigo));
+  const entrarEm = (novo: "receber" | "corrigir") => {
+    setFalha(null);
+    setModo(novo);
+  };
+  /** Erro de Receber ou Correção: o conflito (409) volta à leitura com o aviso; os demais ficam com o formulário. */
+  const falharNoModo = (erro: unknown) => {
+    if (!(erro instanceof ErroApi && erro.status === 409)) throw erro;
+    falhar(erro);
+    setModo("ver");
+  };
   const naoEncontrada = consulta.error instanceof ErroApi && consulta.error.status === 404;
   const duracao = tempoBaseMs() / 1000;
 
@@ -137,28 +159,54 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
           </p>
         </header>
 
-        <ItensDaNota itens={nota.itens} aoRemover={acoes.remover_item ? setItemARemover : undefined} bloqueado={gravando}>
-          {acoes.adicionar_item && (
-            <LinhaNovoItem
-              bloqueado={gravando}
-              aoAdicionar={(dados) => {
-                setFalha(null);
-                return adicionar.mutateAsync(dados).catch((erro: unknown) => {
-                  falhar(erro);
-                  throw erro;
-                });
-              }}
-            />
-          )}
-        </ItensDaNota>
+        {modo === "corrigir" ? (
+          <Correcao
+            itens={nota.itens}
+            aoCancelar={() => setModo("ver")}
+            aoSalvar={(itens) =>
+              corrigir.mutateAsync(itens).then((corrigida) => {
+                abrirImpressao(corrigida.imprimir_url);
+                setModo("ver");
+              }, falharNoModo)
+            }
+          />
+        ) : (
+          <ItensDaNota itens={nota.itens} aoRemover={acoes.remover_item ? setItemARemover : undefined} bloqueado={gravando}>
+            {acoes.adicionar_item && modo === "ver" && (
+              <LinhaNovoItem
+                bloqueado={gravando}
+                aoAdicionar={(dados) => {
+                  setFalha(null);
+                  return adicionar.mutateAsync(dados).catch((erro: unknown) => {
+                    falhar(erro);
+                    throw erro;
+                  });
+                }}
+              />
+            )}
+          </ItensDaNota>
+        )}
 
         <ResumoDaNota pagamentos={nota.pagamentos} total={nota.total} totalPago={nota.total_pago} saldo={nota.saldo} />
+
+        {modo === "receber" && (
+          <Receber
+            saldo={nota.saldo}
+            aoCancelar={() => setModo("ver")}
+            aoConfirmar={(dados) =>
+              receber.mutateAsync(dados).then(({ recibo_url }) => {
+                abrirImpressao(recibo_url);
+                setModo("ver");
+              }, falharNoModo)
+            }
+          />
+        )}
       </div>
     );
   }
 
   function rodape() {
-    if (!nota || naoEncontrada) return undefined;
+    if (!nota || naoEncontrada || modo !== "ver") return undefined;
     const { acoes } = nota;
     if (!Object.values(acoes).some(Boolean)) return undefined;
     return (
@@ -174,7 +222,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
           </Botao>
         )}
         {acoes.corrigir && (
-          <Botao variante="contorno" disabled={gravando} onClick={() => setModo("corrigir")}>
+          <Botao variante="contorno" disabled={gravando} onClick={() => entrarEm("corrigir")}>
             Correção
           </Botao>
         )}
@@ -191,7 +239,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
           </Botao>
         )}
         {acoes.receber && (
-          <Botao disabled={gravando} onClick={() => setModo("receber")}>
+          <Botao disabled={gravando} onClick={() => entrarEm("receber")}>
             Receber
           </Botao>
         )}

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { ErroApi, requisitar, type Metodo } from "../../api/http";
-import type { Nota } from "../../api/tipos";
+import type { FormaPagamento, Nota } from "../../api/tipos";
 
 const ERRO_GENERICO = "Não foi possível concluir. Tente de novo.";
 
@@ -8,6 +8,11 @@ export interface DadosItem {
   descricao: string;
   quantidade: string;
   preco_unitario: string;
+}
+
+export interface DadosPagamento {
+  valor: string;
+  forma: FormaPagamento;
 }
 
 /** "01-03" vira "/api/notas/1-3": a API recebe cliente e número sem zeros à esquerda. */
@@ -36,6 +41,13 @@ function invalidarListas(cliente: QueryClient, codigoDoCliente?: number) {
   return Promise.all(consultas.map((queryKey) => cliente.invalidateQueries({ queryKey })));
 }
 
+/** Grava no cache a nota que o servidor devolveu. */
+function gravarNota(cliente: QueryClient, codigo: string, nota: Nota) {
+  cliente.setQueryData(chaveDaNota(codigo), nota);
+  // Sem esperar: a mutação termina com a resposta do servidor (a impressão abre logo) e as listas recarregam ao fundo.
+  void invalidarListas(cliente, nota.cliente.codigo);
+}
+
 /** Mutação que devolve a nota atualizada: envia a versão do cache e grava a resposta no lugar. */
 function useMutacaoDaNota<V>(codigo: string, pedido: (dados: V) => { metodo: Metodo; sufixo: string; corpo?: object }) {
   const cliente = useQueryClient();
@@ -45,11 +57,7 @@ function useMutacaoDaNota<V>(codigo: string, pedido: (dados: V) => { metodo: Met
       const versao = notaNoCache(cliente, codigo)?.versao;
       return requisitar<Nota>(metodo, caminhoDaNota(codigo) + sufixo, { versao, ...corpo });
     },
-    onSuccess: (nota) => {
-      cliente.setQueryData(chaveDaNota(codigo), nota);
-      // Sem esperar: a mutação termina com a resposta do servidor (a impressão abre logo) e as listas recarregam ao fundo.
-      void invalidarListas(cliente, nota.cliente.codigo);
-    },
+    onSuccess: (nota) => gravarNota(cliente, codigo, nota),
   });
 }
 
@@ -69,6 +77,26 @@ export function useFechar(codigo: string) {
   return useMutacaoDaNota<void>(codigo, () => ({ metodo: "POST", sufixo: "/fechar" }));
 }
 
+/** Corrige a nota: a lista enviada substitui os itens; linha toda em branco é ignorada pelo servidor. */
+export function useCorrigir(codigo: string) {
+  return useMutacaoDaNota(codigo, (itens: DadosItem[]) => ({ metodo: "PUT", sufixo: "/itens", corpo: { itens } }));
+}
+
+/** Recebe um pagamento. A resposta traz a nota atualizada e o endereço do recibo a imprimir. */
+export function useReceber(codigo: string) {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: (dados: DadosPagamento) => {
+      const versao = notaNoCache(cliente, codigo)?.versao;
+      return requisitar<{ recibo_url: string; nota: Nota }>("POST", `${caminhoDaNota(codigo)}/pagamentos`, {
+        versao,
+        ...dados,
+      });
+    },
+    onSuccess: ({ nota }) => gravarNota(cliente, codigo, nota),
+  });
+}
+
 export function useDescartar(codigo: string) {
   const cliente = useQueryClient();
   return useMutation({
@@ -85,9 +113,15 @@ export function useDescartar(codigo: string) {
   });
 }
 
+/** Mensagem a mostrar para um erro vindo de uma requisição. */
+export function mensagemDeErro(erro: unknown): string {
+  return erro instanceof ErroApi ? erro.message : ERRO_GENERICO;
+}
+
 /** Mensagem a mostrar para um erro numa ação da nota; em conflito de versão (409) também recarrega a nota. */
 export function tratarErroDeNota(clienteDeConsulta: QueryClient, erro: unknown, codigo: string): string {
-  if (!(erro instanceof ErroApi)) return ERRO_GENERICO;
-  if (erro.status === 409) void clienteDeConsulta.invalidateQueries({ queryKey: chaveDaNota(codigo) });
-  return erro.message;
+  if (erro instanceof ErroApi && erro.status === 409) {
+    void clienteDeConsulta.invalidateQueries({ queryKey: chaveDaNota(codigo) });
+  }
+  return mensagemDeErro(erro);
 }

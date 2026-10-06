@@ -1,0 +1,31 @@
+.pagar-divida { display: flex; flex-direction: column; gap: var(--espaco-4); }
+
+.pagar-divida__divida {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+}
+.pagar-divida__divida strong { color: var(--cor-texto); }
+
+.pagar-divida__campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espaco-3);
+}
+.pagar-divida__campos .campo__entrada { width: 100%; min-width: 0; }
+
+.pagar-divida__previa { width: 100%; border-collapse: collapse; }
+.pagar-divida__previa th {
+  padding: var(--espaco-2) 0;
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-texto-apoio);
+  font-size: var(--texto-pequeno);
+  font-weight: 600;
+  text-align: left;
+}
+.pagar-divida__previa td { padding: var(--espaco-2) 0; border-bottom: 1px solid var(--cor-borda); }
+/* Saldo e abate alinhados à direita, como os valores das listas. */
+.pagar-divida__previa :is(th, td):not(:first-child) { text-align: right; white-space: nowrap; }

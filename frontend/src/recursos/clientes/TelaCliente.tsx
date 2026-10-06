@@ -12,14 +12,10 @@ import { Selo } from "../../componentes/Selo";
 import { useAbrirNota } from "../notas/abrirNota";
 import { useCliente, useCriarNota, useEditarCliente, useExcluirCliente } from "./clientes";
 import { FormularioCliente } from "./FormularioCliente";
+import { PagarDivida } from "./PagarDivida";
 import "./TelaCliente.css";
 
-interface Props {
-  /** Abre o diálogo de pagar dívida total (Task 8); por enquanto sem efeito. */
-  abrirPagarDivida?: () => void;
-}
-
-export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
+export function TelaCliente() {
   const { codigo = "" } = useParams();
   const navegar = useNavigate();
   const abrirNota = useAbrirNota();
@@ -29,6 +25,7 @@ export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
   const excluir = useExcluirCliente(codigo);
   const [editando, setEditando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [pagando, setPagando] = useState(false);
   const [falha, setFalha] = useState<string | null>(null);
   const excluido = useRef(false);
   const limparAtual = useRef(excluir.limpar);
@@ -98,7 +95,7 @@ export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
           Nova nota contínua
         </Botao>
         {c.divida !== "0.00" && (
-          <Botao variante="contorno" onClick={abrirPagarDivida}>
+          <Botao variante="contorno" onClick={() => setPagando(true)}>
             Pagar dívida total
           </Botao>
         )}
@@ -147,6 +144,8 @@ export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
           }}
         />
       </Dialogo>
+
+      <PagarDivida cliente={c} aberto={pagando} aoFechar={() => setPagando(false)} />
 
       <Dialogo.Confirmacao
         aberto={excluindo}

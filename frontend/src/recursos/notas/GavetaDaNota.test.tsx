@@ -218,16 +218,24 @@ describe("GavetaDaNota", () => {
     expect(screen.queryAllByLabelText("Descrição")).toHaveLength(acoes.adicionar_item ? 1 : 0);
   });
 
-  it("Reimprimir abre a impressão; Receber e Correção ainda não mostram nada", async () => {
+  it("Reimprimir abre a impressão sem chamar a API", async () => {
     const abrirJanela = vi.spyOn(window, "open").mockReturnValue(null);
     simular(() => responder(nota({ acoes: CONTINUA_ABERTA })));
     const usuario = abrir();
     await usuario.click(await screen.findByRole("button", { name: "Reimprimir" }));
     expect(abrirJanela).toHaveBeenCalledWith("/notas/1-1/imprimir", "_blank", "noopener");
-    await usuario.click(screen.getByRole("button", { name: "Receber" }));
-    await usuario.click(screen.getByRole("button", { name: "Correção" }));
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
     expect(chamadas()).toEqual([GET_NOTA]);
+  });
+
+  it("em Receber, a linha de novo item some até o formulário fechar", async () => {
+    simular(() => responder(nota({ acoes: CONTINUA_ABERTA })));
+    const usuario = abrir();
+    await usuario.click(await screen.findByRole("button", { name: "Receber" }));
+    expect(screen.getByRole("form", { name: "Receber pagamento" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Descrição")).not.toBeInTheDocument();
+    await usuario.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.getByLabelText("Descrição")).toBeInTheDocument();
   });
 
   it("adicionar item envia a versão da nota carregada e atualiza total e saldo sem novo GET", async () => {

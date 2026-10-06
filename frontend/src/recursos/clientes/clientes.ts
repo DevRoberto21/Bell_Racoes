@@ -1,14 +1,22 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { requisitar } from "../../api/http";
-import type { ClienteDetalhe, ClienteLinha, Nota, TipoNota } from "../../api/tipos";
+import { ErroApi, requisitar } from "../../api/http";
+import type { ClienteDetalhe, ClienteLinha, FormaPagamento, Nota, PreviaDivida, TipoNota } from "../../api/tipos";
 
 const ESPERA_MS = 150;
+const ESPERA_DA_PREVIA_MS = 200;
 
 export interface DadosCliente {
   nome: string;
   apelido: string;
   telefone: string;
+}
+
+export interface DadosPagamentoDaDivida {
+  valor: string;
+  forma: FormaPagamento;
+  /** A dívida que a tela mostrava: se já for outra, o servidor recusa com 409. */
+  divida_esperada: string;
 }
 
 export function useClientes(q: string) {
@@ -76,5 +84,50 @@ export function useCriarNota(codigo: string) {
   return useMutation({
     mutationFn: (tipo: TipoNota) => requisitar<Nota>("POST", `/api/clientes/${codigo}/notas`, { tipo }),
     onSuccess: () => invalidar(cliente, codigo),
+  });
+}
+
+/**
+ * Distribuição de `valor` ("100.00", ou null quando o digitado não é número) pelas notas do cliente.
+ * Enquanto o valor muda, espera 200 ms sem digitação antes de consultar; `previa` só existe quando
+ * corresponde ao valor atual.
+ */
+export function usePreviaDivida(clienteCodigo: string, valor: string | null) {
+  const [espera, setEspera] = useState(valor);
+  useEffect(() => {
+    if (valor === espera) return;
+    const temporizador = setTimeout(() => setEspera(valor), ESPERA_DA_PREVIA_MS);
+    return () => clearTimeout(temporizador);
+  }, [valor, espera]);
+
+  const consulta = useQuery({
+    // Debaixo da chave do cliente: recarregar o cliente recarrega também a prévia em uso.
+    queryKey: ["cliente", clienteCodigo, "previa", espera],
+    queryFn: () =>
+      requisitar<PreviaDivida>("GET", `/api/clientes/${clienteCodigo}/divida/previa?valor=${encodeURIComponent(espera as string)}`),
+    enabled: espera !== null,
+    // Fora de uso a prévia é descartada: a dívida muda a cada pagamento, e uma prévia velha enganaria.
+    gcTime: 0,
+  });
+  return { previa: espera === valor ? consulta.data : undefined };
+}
+
+/** Paga a dívida do cliente. A resposta traz o cliente atualizado e o endereço do recibo a imprimir. */
+export function usePagarDivida(clienteCodigo: string) {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: (dados: DadosPagamentoDaDivida) =>
+      requisitar<{ recibo_url: string; cliente: ClienteDetalhe }>("POST", `/api/clientes/${clienteCodigo}/pagamentos`, dados),
+    onSuccess: (resposta) => {
+      cliente.setQueryData(["cliente", clienteCodigo], resposta.cliente);
+      // Sem esperar: a mutação termina com a resposta do servidor (o recibo abre logo) e o resto recarrega ao fundo.
+      for (const queryKey of [["clientes"], ["painel"], ["pagas"], ["nota"]]) void cliente.invalidateQueries({ queryKey });
+    },
+    onError: (erro) => {
+      // A dívida mudou em outra tela: busca o cliente e a prévia de novo.
+      if (erro instanceof ErroApi && erro.status === 409) {
+        void cliente.invalidateQueries({ queryKey: ["cliente", clienteCodigo] });
+      }
+    },
   });
 }
