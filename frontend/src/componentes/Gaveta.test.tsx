@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MotionGlobalConfig } from "motion/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
+import { simularMovimentoReduzido } from "../teste/movimento";
 import { Dialogo } from "./Dialogo";
 import { Gaveta } from "./Gaveta";
 
@@ -135,6 +136,22 @@ describe("Gaveta", () => {
       await waitFor(() => expect(gaveta()).not.toBeInTheDocument(), { timeout: 4000 });
     } finally {
       MotionGlobalConfig.skipAnimations = true;
+    }
+  });
+
+  it("com movimento reduzido, véu e painel entram e saem sem animar", async () => {
+    const desfazer = simularMovimentoReduzido();
+    try {
+      const { usuario } = await abrir();
+      await waitFor(() => {
+        expect(screen.getByTestId("veu-gaveta")).toHaveStyle({ opacity: "1" });
+        expect(gaveta()?.style.transform).not.toMatch(/translate/);
+      });
+      await usuario.keyboard("{Escape}");
+      await sumiu();
+      expect(screen.queryByTestId("veu-gaveta")).not.toBeInTheDocument();
+    } finally {
+      desfazer();
     }
   });
 });

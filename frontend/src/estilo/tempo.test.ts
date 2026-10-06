@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { simularMovimentoReduzido } from "../teste/movimento";
 import { duracaoEmMs, tempoBaseMs } from "./tempo";
 
 describe("duracaoEmMs", () => {
@@ -23,5 +24,21 @@ describe("tempoBaseMs", () => {
     document.documentElement.style.setProperty("--tempo-base", "250ms");
     expect(tempoBaseMs()).toBe(250);
     document.documentElement.style.removeProperty("--tempo-base");
+  });
+
+  it("lê 0 quando a variável vale 0s", () => {
+    document.documentElement.style.setProperty("--tempo-base", "0s");
+    expect(tempoBaseMs()).toBe(0);
+    document.documentElement.style.removeProperty("--tempo-base");
+  });
+
+  it("com movimento reduzido devolve 0, seja qual for a variável", () => {
+    const desfazer = simularMovimentoReduzido();
+    try {
+      expect(tempoBaseMs()).toBe(0);
+    } finally {
+      desfazer();
+    }
+    expect(tempoBaseMs()).toBe(400);
   });
 });

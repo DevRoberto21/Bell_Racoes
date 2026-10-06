@@ -1,8 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AcoesDaNota, Nota } from "../../api/tipos";
+import { simularMovimentoReduzido } from "../../teste/movimento";
 import { renderizarComApp, responder } from "../../teste/renderizar";
 import { GavetaDaNota } from "./GavetaDaNota";
 
@@ -446,5 +448,77 @@ describe("GavetaDaNota", () => {
     await usuario.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(local()).toHaveTextContent(/^\/clientes\?q=ana&pagina=2$/);
+  });
+
+  it("Finalizar e imprimir abre a impressão sem esperar as listas recarregarem", async () => {
+    const abrirJanela = vi.spyOn(window, "open").mockReturnValue(null);
+    const finalizada = nota({ versao: 5, situacao: "ABERTA", situacao_rotulo: "Aberta", acoes: FECHADA });
+    let buscasDoPainel = 0;
+    simular(
+      () => responder(nota()),
+      (chave) => {
+        if (chave === "POST /api/notas/1-1/finalizar") return responder(finalizada);
+        // A primeira carga do painel responde; a recarga pedida pela mutação nunca termina.
+        if (chave === "GET /api/painel") return buscasDoPainel++ === 0 ? responder({}) : new Promise(() => {});
+        return undefined;
+      },
+    );
+    function Painel() {
+      const painel = useQuery({ queryKey: ["painel"], queryFn: () => fetch("/api/painel", { method: "GET" }) });
+      return painel.isSuccess ? <p>painel carregado</p> : null;
+    }
+    renderizarComApp(
+      <>
+        <Painel />
+        <GavetaDaNota />
+      </>,
+      { rota: "/?nota=01-01" },
+    );
+    const usuario = userEvent.setup();
+    await screen.findByText("painel carregado");
+    await usuario.click(await screen.findByRole("button", { name: "Finalizar e imprimir" }));
+    await waitFor(() => expect(abrirJanela).toHaveBeenCalledWith("/notas/1-1/imprimir", "_blank", "noopener"));
+    expect(buscasDoPainel).toBe(2);
+    // As ações da nota também destravam sem esperar as listas.
+    expect(await screen.findByRole("button", { name: "Receber" })).toBeEnabled();
+  });
+
+  it("com movimento reduzido, o item novo entra sem fade", async () => {
+    simular(
+      () => responder(nota()),
+      (chave) => (chave === "POST /api/notas/1-1/itens" ? responder(comMilho()) : undefined),
+    );
+    const desfazer = simularMovimentoReduzido();
+    try {
+      const usuario = abrir();
+      await digitarItem(usuario, "Milho", "2", "50,00");
+      const linha = (await screen.findByText("Milho")).closest("li") as HTMLElement;
+      await waitFor(() => {
+        expect(linha).toHaveStyle({ opacity: "1" });
+        expect(linha.style.transform).not.toMatch(/translate/);
+      });
+      expect(linhaDoResumo("Total")).toHaveTextContent("R$ 160,00");
+    } finally {
+      desfazer();
+    }
+  });
+
+  it("com movimento reduzido, o aviso de erro aparece sem fade", async () => {
+    simular(
+      () => responder(nota({ acoes: CONTINUA_ABERTA })),
+      (chave) => (chave === "POST /api/notas/1-1/fechar" ? responder({ erro: "Nota sem itens." }, 400) : undefined),
+    );
+    const desfazer = simularMovimentoReduzido();
+    try {
+      const usuario = abrir();
+      await usuario.click(await screen.findByRole("button", { name: "Fechar nota" }));
+      const falha = (await screen.findByRole("alert")).closest(".nota__falha") as HTMLElement;
+      await waitFor(() => {
+        expect(falha).toHaveStyle({ opacity: "1" });
+        expect(falha.style.transform).not.toMatch(/translate/);
+      });
+    } finally {
+      desfazer();
+    }
   });
 });

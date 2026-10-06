@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -173,6 +173,24 @@ describe("mutações da nota", () => {
     expect(chamada[0]).toBe("/api/notas/1-3");
     expect(corpo(chamada)).toEqual({ versao: 7 });
     expect(cliente.getQueryData(["nota", CODIGO])).toBeUndefined();
+  });
+
+  it("finalizar termina com a nota já no cache, sem esperar as listas recarregarem", async () => {
+    let buscasDoPainel = 0;
+    cliente.setQueryDefaults(["painel"], {
+      queryFn: () => (buscasDoPainel++ === 0 ? Promise.resolve({}) : new Promise(() => {})),
+    });
+    const painel = renderHook(() => useQuery({ queryKey: ["painel"] }), { wrapper: envolver });
+    await waitFor(() => expect(painel.result.current.isSuccess).toBe(true));
+    const { result } = renderHook(() => useFinalizar(CODIGO), { wrapper: envolver });
+    let devolvida: Nota | undefined;
+    act(() => {
+      void result.current.mutateAsync().then((n) => (devolvida = n));
+    });
+    await waitFor(() => expect(devolvida?.versao).toBe(8));
+    expect(cliente.getQueryData<Nota>(["nota", CODIGO])?.versao).toBe(8);
+    expect(buscasDoPainel).toBe(2);
+    expect(cliente.isFetching({ queryKey: ["painel"] })).toBe(1);
   });
 
   it("cada mutação invalida painel, cliente da nota, clientes e pagas", async () => {

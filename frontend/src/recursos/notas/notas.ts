@@ -47,7 +47,8 @@ function useMutacaoDaNota<V>(codigo: string, pedido: (dados: V) => { metodo: Met
     },
     onSuccess: (nota) => {
       cliente.setQueryData(chaveDaNota(codigo), nota);
-      return invalidarListas(cliente, nota.cliente.codigo);
+      // Sem esperar: a mutação termina com a resposta do servidor (a impressão abre logo) e as listas recarregam ao fundo.
+      void invalidarListas(cliente, nota.cliente.codigo);
     },
   });
 }
@@ -78,6 +79,7 @@ export function useDescartar(codigo: string) {
     },
     onSuccess: (codigoDoCliente) => {
       cliente.removeQueries({ queryKey: chaveDaNota(codigo) });
+      // Só o descarte espera as listas: a gaveta fecha já sobre a tela sem a nota descartada.
       return invalidarListas(cliente, codigoDoCliente);
     },
   });

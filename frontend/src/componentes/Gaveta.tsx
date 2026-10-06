@@ -62,7 +62,8 @@ export function Gaveta({ aberta, titulo, aoFechar, rodape, children }: Props) {
           initial={{ x: "100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
-          transition={{ type: "spring", duration: duracao, bounce: 0.15 }}
+          // Sem duração (movimento reduzido) não há mola: o painel troca de lugar na hora.
+          transition={duracao === 0 ? { duration: 0 } : { type: "spring", duration: duracao, bounce: 0.15 }}
         >
           <header className="gaveta__cabecalho">
             <h2 className="gaveta__titulo numero" id={idTitulo}>

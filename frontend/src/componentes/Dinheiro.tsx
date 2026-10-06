@@ -1,4 +1,3 @@
-import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { formatarDinheiro } from "../api/numero";
 import { tempoBaseMs } from "../estilo/tempo";
@@ -20,17 +19,17 @@ function deCentavos(centavos: bigint): string {
 }
 
 export function Dinheiro({ valor, animar = false }: Props) {
-  const reduzido = useReducedMotion();
   const [exibido, setExibido] = useState(() => paraCentavos(valor));
   const atual = useRef(exibido);
-  const direto = !animar || reduzido;
+  // Duração 0 (movimento reduzido, ou --tempo-base zerado): não há contagem, o valor aparece direto.
+  const duracao = animar ? tempoBaseMs() : 0;
+  const direto = duracao === 0;
 
   useEffect(() => {
     if (direto) return;
     const origem = atual.current;
     const destino = paraCentavos(valor);
     if (origem === destino) return;
-    const duracao = tempoBaseMs();
     const inicio = performance.now();
     let quadro = 0;
     const passo = (agora: number) => {
@@ -44,7 +43,7 @@ export function Dinheiro({ valor, animar = false }: Props) {
     };
     quadro = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(quadro);
-  }, [valor, direto]);
+  }, [valor, direto, duracao]);
 
   const texto = direto ? valor : deCentavos(exibido);
   return <span className="numero">R$ {formatarDinheiro(texto)}</span>;
