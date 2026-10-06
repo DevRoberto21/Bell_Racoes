@@ -28,10 +28,10 @@ def api(*metodos, login=True):
         @login_not_required
         @wraps(view)
         def interna(request, *args, **kwargs):
-            if request.method not in metodos:
-                return erro("Método não permitido.", 405)
             if login and not request.user.is_authenticated:
                 return erro("Entre no sistema para continuar.", 401)
+            if request.method not in metodos:
+                return erro("Método não permitido.", 405)
             try:
                 request.dados = _ler_corpo(request)
             except ValueError:

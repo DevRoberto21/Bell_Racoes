@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from fiado.models import Nota
 from fiado.servicos.clientes import criar_cliente
-from fiado.servicos.notas import criar_nota
+from fiado.servicos.notas import adicionar_item, criar_nota
 from fiado.servicos.pagamentos import pagar_divida_total, registrar_pagamento
 from fiado.tests.fabrica import nota_continua_aberta, nota_unica_fechada
 
@@ -76,6 +76,7 @@ def test_recibo_de_lote_na_nota(logado, cliente, usuario):
         ("rascunho_vazio", {"adicionar_item": True, "remover_item": True, "finalizar": False, "descartar": True, "imprimir": False, "receber": False, "corrigir": False, "fechar": False}),
         ("continua_com_item", {"adicionar_item": True, "remover_item": False, "finalizar": False, "descartar": False, "imprimir": True, "receber": True, "corrigir": True, "fechar": True}),
         ("continua_vazia", {"adicionar_item": True, "remover_item": False, "finalizar": False, "descartar": True, "imprimir": True, "receber": False, "corrigir": True, "fechar": False}),
+        ("unica_com_item", {"adicionar_item": True, "remover_item": True, "finalizar": True, "descartar": True, "imprimir": False, "receber": False, "corrigir": False, "fechar": False}),
         ("quitada", {"adicionar_item": False, "remover_item": False, "finalizar": False, "descartar": False, "imprimir": True, "receber": False, "corrigir": False, "fechar": False}),
     ],
 )
@@ -84,6 +85,12 @@ def test_acoes_por_situacao(logado, cliente, usuario, preparar, esperado):
         criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
     elif preparar == "continua_com_item":
         nota_continua_aberta(cliente, usuario)
+    elif preparar == "unica_com_item":
+        nota = criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+        adicionar_item(
+            nota=nota, versao=nota.versao, descricao="Ração 15kg", quantidade=Decimal("1"),
+            preco_unitario=Decimal("10.00"), usuario=usuario,
+        )
     elif preparar == "continua_vazia":
         criar_nota(cliente=cliente, tipo=Nota.Tipo.CONTINUA, usuario=usuario)
     else:
@@ -120,6 +127,10 @@ def test_cliente_detalhe(logado, cliente, usuario):
     assert corpo["tem_continua_aberta"] is True
     assert corpo["pode_excluir"] is False
     assert logado.get("/api/clientes/99").status_code == 404
+
+
+def test_cliente_sem_nota_pode_ser_excluido(logado, cliente):
+    assert logado.get("/api/clientes/1").json()["pode_excluir"] is True
 
 
 def test_previa_da_divida(logado, cliente, usuario):

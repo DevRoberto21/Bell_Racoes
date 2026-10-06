@@ -30,6 +30,14 @@ def cliente_linha(cliente, divida, notas_abertas):
     }
 
 
+def linhas_de_clientes(clientes):
+    dividas = consultas.dividas_por_cliente()
+    abertas = consultas.notas_abertas_por_cliente()
+    return [
+        cliente_linha(c, dividas.get(c.id, ZERO), abertas.get(c.id, 0)) for c in clientes
+    ]
+
+
 def cliente_detalhe(cliente):
     notas = list(consultas.notas_em_aberto(cliente))
     return cliente_linha(cliente, consultas.divida_do_cliente(cliente), len(notas)) | {
@@ -84,7 +92,7 @@ def acoes_da_nota(nota, tem_itens, tem_pagamentos, saldo):
     }
 
 
-def _recibo_url(pagamento):
+def recibo_url(pagamento):
     if pagamento.lote:
         return f"/recibos/lote/{pagamento.lote}/"
     return f"/recibos/{pagamento.id}/"
@@ -93,8 +101,7 @@ def _recibo_url(pagamento):
 def nota_completa(nota, hoje=None):
     itens = list(nota.itens.all())
     pagamentos = list(nota.pagamentos.select_related("recebido_por"))
-    total, total_pago = nota.total, nota.total_pago
-    saldo = total - total_pago
+    total, total_pago, saldo = nota.total, nota.total_pago, nota.saldo
     return _resumo(nota, total, saldo, hoje) | {
         "editada_em": _data(nota.editada_em),
         "versao": nota.versao,
@@ -117,7 +124,7 @@ def nota_completa(nota, hoje=None):
                 "forma_rotulo": pagamento.get_forma_display(),
                 "recebido_em": _data(pagamento.recebido_em),
                 "recebido_por": pagamento.recebido_por.get_username(),
-                "recibo_url": _recibo_url(pagamento),
+                "recibo_url": recibo_url(pagamento),
             }
             for pagamento in pagamentos
         ],

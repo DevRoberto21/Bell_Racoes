@@ -1,19 +1,16 @@
-from decimal import Decimal
-
 from django.conf import settings
 
 from fiado import consultas
 from fiado.api.http import api
 from fiado.api.serializadores import (
     cliente_detalhe,
-    cliente_linha,
     dinheiro,
+    linhas_de_clientes,
     nota_resumo,
 )
 from fiado.backup import copia_de_hoje_existe
 from fiado.busca import buscar, filtrar_clientes
 
-ZERO = Decimal("0.00")
 LIMITE_BUSCA = 8
 
 
@@ -38,15 +35,8 @@ def busca(request):
         return {"tipo": "nao_encontrado", "mensagem": resultado.mensagem}
     if not resultado.termo:
         return {"tipo": "lista", "clientes": []}
-    dividas = consultas.dividas_por_cliente()
-    abertas = consultas.notas_abertas_por_cliente()
     clientes = filtrar_clientes(resultado.termo)[:LIMITE_BUSCA]
-    return {
-        "tipo": "lista",
-        "clientes": [
-            cliente_linha(c, dividas.get(c.id, ZERO), abertas.get(c.id, 0)) for c in clientes
-        ],
-    }
+    return {"tipo": "lista", "clientes": linhas_de_clientes(clientes)}
 
 
 @api("GET")
