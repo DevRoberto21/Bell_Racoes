@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
 import "./Selo.css";
 
-export function rotuloDeAlerta(nivel: number): string {
-  return `${nivel * 7} dias`;
-}
-
 type Props =
   | { nivel: number; tipo?: undefined; children: ReactNode }
   | { tipo: "quitada" | "editado" | "rascunho"; nivel?: undefined; children: ReactNode };

@@ -7,10 +7,10 @@
   list-style: none;
 }
 
-/* Entrada em sequência: 40 ms por item, só os oito primeiros. */
+/* Entrada em sequência, só os oito primeiros; o último termina antes de --tempo-base. */
 .lista__item:nth-child(-n + 8) {
-  animation: lista-entrada var(--tempo-base) var(--curva-mola) backwards;
-  animation-delay: calc((var(--posicao, 1) - 1) * 40ms);
+  animation: lista-entrada var(--tempo-entrada) var(--curva-mola) backwards;
+  animation-delay: calc((var(--posicao, 1) - 1) * var(--tempo-escalonamento));
 }
 .lista__item:nth-child(1) { --posicao: 1; }
 .lista__item:nth-child(2) { --posicao: 2; }

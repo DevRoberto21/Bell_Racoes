@@ -64,6 +64,7 @@ export function Busca() {
 
   function aoTeclar(evento: KeyboardEvent<HTMLInputElement>) {
     if (evento.key === "Escape") {
+      evento.preventDefault(); // senão o navegador limpa o campo type="search"
       setAberta(false);
     } else if (evento.key === "ArrowDown" || evento.key === "ArrowUp") {
       evento.preventDefault();

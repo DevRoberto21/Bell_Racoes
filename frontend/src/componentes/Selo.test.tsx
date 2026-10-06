@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Selo, rotuloDeAlerta } from "./Selo";
+import { rotuloDeAlerta } from "./rotuloDeAlerta";
+import { Selo } from "./Selo";
 
 describe("Selo", () => {
   it("rotuloDeAlerta devolve múltiplos de 7 dias", () => {

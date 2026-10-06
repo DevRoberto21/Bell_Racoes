@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClienteDetalhe, NotaResumo } from "../../api/tipos";
@@ -131,9 +131,12 @@ describe("Busca", () => {
   it("Esc fecha a lista e mantém o texto", async () => {
     simular({ tipo: "cliente", cliente });
     renderizarComApp(<Busca />);
-    const { usuario, campo } = await digitar("12");
+    const { campo } = await digitar("12");
     expect(screen.getByRole("listbox")).toBeInTheDocument();
-    await usuario.keyboard("{Escape}");
+    // fireEvent devolve false quando o keydown foi cancelado (preventDefault): sem isso,
+    // Chrome e Safari limpam o campo type="search" ao apertar Esc.
+    const seguiu = fireEvent.keyDown(campo, { key: "Escape" });
+    expect(seguiu).toBe(false);
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     expect(campo).toHaveValue("12");
   });

@@ -1,12 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { MemoryRouter, useLocation } from "react-router";
-
-function LocalAtual() {
-  const local = useLocation();
-  return <output data-testid="local">{local.pathname + local.search}</output>;
-}
+import { MemoryRouter } from "react-router";
+import { LocalAtual } from "./LocalAtual";
 
 /** Renderiza com um QueryClient novo e um MemoryRouter; `local` mostra o endereço atual. */
 export function renderizarComApp(ui: ReactElement, opcoes: { rota?: string } = {}) {

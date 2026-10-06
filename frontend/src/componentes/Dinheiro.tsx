@@ -1,13 +1,12 @@
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { formatarDinheiro } from "../api/numero";
+import { tempoBaseMs } from "../estilo/tempo";
 
 interface Props {
   valor: string;
   animar?: boolean;
 }
-
-const DURACAO_MS = 400; // igual a --tempo-base
 
 /** "96.40" vira 9640n, só com texto: nunca passa por float de reais. */
 function paraCentavos(valor: string): bigint {
@@ -31,10 +30,11 @@ export function Dinheiro({ valor, animar = false }: Props) {
     const origem = atual.current;
     const destino = paraCentavos(valor);
     if (origem === destino) return;
+    const duracao = tempoBaseMs();
     const inicio = performance.now();
     let quadro = 0;
     const passo = (agora: number) => {
-      const progresso = Math.min((agora - inicio) / DURACAO_MS, 1);
+      const progresso = Math.min((agora - inicio) / duracao, 1);
       const suave = 1 - (1 - progresso) ** 3;
       const proximo =
         progresso >= 1 ? destino : origem + (destino - origem) * BigInt(Math.round(suave * 1000)) / 1000n;

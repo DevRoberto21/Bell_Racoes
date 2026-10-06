@@ -43,6 +43,8 @@
 
   --tempo-base: 0.4s;
   --tempo-micro: 0.15s;
+  --tempo-entrada: 0.2s;
+  --tempo-escalonamento: 25ms;
   --curva-mola: cubic-bezier(0.22, 1.2, 0.36, 1);
   --sombra-gaveta: -12px 0 28px rgb(35 40 51 / 0.08);
 }
