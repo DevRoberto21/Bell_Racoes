@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { simularMovimentoReduzido } from "../../teste/movimento";
@@ -145,6 +145,26 @@ describe("Receber", () => {
     await usuario.click(confirmar());
     await waitFor(() => expect(valor()).toHaveAccessibleDescription("Informe um número válido."));
     expect(valor()).toBeInvalid();
+  });
+
+  it("envia a versão que a nota tinha ao abrir o formulário, mesmo com uma mais nova no cache", async () => {
+    vi.spyOn(window, "open").mockReturnValue(null);
+    let atual = notaDeTeste();
+    const { api, usuario } = await abrirReceber(
+      (chave) => (chave === POST ? recebido() : undefined),
+      () => atual,
+    );
+    // Outra tela recebe 40,00 (versão 5); a volta do foco à janela recarrega a nota por baixo do formulário.
+    atual = parcial();
+    act(() => {
+      window.dispatchEvent(new Event("visibilitychange"));
+    });
+    await waitFor(() => expect(api.quantas(GET_NOTA)).toBe(2));
+    await waitFor(() => expect(saldo()).toHaveTextContent("R$ 120,00"), { timeout: 4000 });
+    expect(valor()).toHaveValue("160,00");
+    await usuario.click(confirmar());
+    await waitFor(() => expect(api.quantas(POST)).toBe(1));
+    expect(api.corpoDe(POST)).toEqual({ versao: 4, valor: "160.00", forma: "DINHEIRO" });
   });
 
   it("409 recarrega a nota e fecha o formulário com o aviso na gaveta", async () => {

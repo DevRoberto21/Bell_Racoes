@@ -107,6 +107,8 @@ describe("TelaEntrar", () => {
     ["outro site com barra invertida", "/\\evil.com"],
     ["endereço completo", "https://evil.com"],
     ["caminho sem barra inicial", "clientes"],
+    ["outro site escondido atrás de uma tabulação", "/\t/evil.com"],
+    ["outro site escondido atrás de uma quebra de linha", "/\n/evil.com"],
   ])("recusa %s e vai para a raiz", async (_caso, destino) => {
     const atribuir = vi.fn();
     vi.stubGlobal("location", { ...window.location, assign: atribuir });

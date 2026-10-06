@@ -29,6 +29,20 @@ Isso gera a pasta `frontend/dist`, que precisa ir junto. A loja não precisa de 
 5. Para iniciar junto com o Windows: `Win + R`, digite `shell:startup`, e coloque ali um atalho para `iniciar.bat`.
 6. Fixe o endereço IP do caixa 1 no roteador (por exemplo `192.168.0.10`) e libere a porta 8000 no Firewall do Windows para a rede privada.
 
+## Atualizar o sistema
+
+Quando houver uma versão nova:
+
+1. Na máquina de desenvolvimento, gere as telas de novo:
+
+   ```bash
+   npm --prefix frontend ci
+   npm --prefix frontend run build
+   ```
+
+2. Copie a pasta do projeto de novo para `C:\BellRacoes`, por cima da anterior. Copie tudo, menos as pastas `.venv`, `dados` e `frontend/node_modules`. O `iniciar.bat` é copiado junto: se os dados da loja foram alterados nele, confira as três linhas depois de copiar (veja "Dados da loja no impresso").
+3. Feche a janela preta do sistema e abra o `iniciar.bat` de novo. O servidor lê a lista de arquivos das telas quando inicia: sem fechar e abrir, as telas novas não carregam.
+
 ## Navegador (os dois caixas)
 
 - Caixa 1 abre `http://localhost:8000`. Caixa 2 abre `http://192.168.0.10:8000`.

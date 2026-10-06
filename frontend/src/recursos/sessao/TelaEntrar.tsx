@@ -8,9 +8,14 @@ import { useEntrar } from "./sessao";
 import "./TelaEntrar.css";
 
 function destinoSeguro(destino: string | null): string {
-  // Só caminhos internos: "//site" e "/\site" levam o navegador para outro site.
   if (!destino || !destino.startsWith("/")) return "/";
-  return destino[1] === "/" || destino[1] === "\\" ? "/" : destino;
+  // Só caminhos internos. Quem decide é o leitor de endereços do navegador: para ele "//site", "/\site" e
+  // "/<tabulação>/site" são outro site.
+  try {
+    return new URL(destino, window.location.origin).origin === window.location.origin ? destino : "/";
+  } catch {
+    return "/";
+  }
 }
 
 // As páginas de impressão são do Django: o roteador do front não as conhece.

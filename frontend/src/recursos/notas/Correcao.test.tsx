@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { adiado, notaDeTeste, simularFetch } from "../../teste/notas";
@@ -20,6 +20,28 @@ const corrigida = () =>
     ],
     imprimir_url: "/notas/1-1/imprimir/?v=5",
   });
+
+/** A nota depois de outra tela acrescentar um item: versão 5, total 172,00. */
+const comItemDeOutraTela = () => {
+  const base = notaDeTeste();
+  return notaDeTeste({
+    versao: 5,
+    total: "172.00",
+    saldo: "172.00",
+    itens: [...base.itens, { id: 9, descricao: "Sal mineral", quantidade: "1.000", preco_unitario: "12.00", subtotal: "12.00" }],
+  });
+};
+
+const total = () => screen.getByText("Total").closest("div") as HTMLElement;
+
+/** A janela volta a ter foco: a nota aberta é buscada de novo, por baixo do formulário. */
+async function voltarAJanela(api: { quantas: (chave: string) => number }) {
+  act(() => {
+    window.dispatchEvent(new Event("visibilitychange"));
+  });
+  await waitFor(() => expect(api.quantas(GET_NOTA)).toBe(2));
+  await waitFor(() => expect(total()).toHaveTextContent("R$ 172,00"), { timeout: 4000 });
+}
 
 /** Abre a gaveta da nota 01-01 e clica em Correção. */
 async function abrirCorrecao(rotas: (chave: string) => unknown, dados = () => notaDeTeste()) {
@@ -167,6 +189,41 @@ describe("Correcao", () => {
     expect(descricao(1)).toHaveValue("Ração 15kg");
     expect(preco(1)).toHaveValue("42,50");
     expect(descricao(2)).toHaveValue("Sal");
+  });
+
+  it("envia a versão que a nota tinha ao abrir a correção, mesmo com uma mais nova no cache", async () => {
+    vi.spyOn(window, "open").mockReturnValue(null);
+    let atual = notaDeTeste();
+    const { api, usuario } = await abrirCorrecao(
+      (chave) => (chave === PUT ? responder(corrigida()) : undefined),
+      () => atual,
+    );
+    atual = comItemDeOutraTela();
+    await voltarAJanela(api);
+    // O formulário continua com os dois itens copiados ao abrir.
+    expect(screen.queryByLabelText("Descrição do item 3")).not.toBeInTheDocument();
+    await usuario.click(salvar());
+    await waitFor(() => expect(api.quantas(PUT)).toBe(1));
+    expect(api.corpoDe(PUT).versao).toBe(4);
+  });
+
+  it("a correção feita sobre uma versão antiga cai no conflito: aviso, leitura e o item da outra tela na nota", async () => {
+    const abrirJanela = vi.spyOn(window, "open").mockReturnValue(null);
+    let atual = notaDeTeste();
+    const { api, usuario } = await abrirCorrecao(
+      (chave) =>
+        chave === PUT ? responder({ erro: "A nota mudou em outra tela. Confira e tente de novo." }, 409) : undefined,
+      () => atual,
+    );
+    atual = comItemDeOutraTela();
+    await voltarAJanela(api);
+    await usuario.click(salvar());
+    expect(await screen.findByRole("alert")).toHaveTextContent("A nota mudou em outra tela. Confira e tente de novo.");
+    expect(api.corpoDe(PUT).versao).toBe(4);
+    expect(formulario()).not.toBeInTheDocument();
+    expect(await screen.findByText("Sal mineral")).toBeInTheDocument();
+    expect(api.quantas(GET_NOTA)).toBe(3);
+    expect(abrirJanela).not.toHaveBeenCalled();
   });
 
   it("Cancelar volta à leitura sem enviar", async () => {

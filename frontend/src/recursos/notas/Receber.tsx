@@ -14,17 +14,21 @@ import "./Receber.css";
 interface Props {
   /** Saldo da nota ("96.40"): é o valor que o formulário propõe. */
   saldo: string;
-  /** Rejeita quando o pagamento não entra; o erro aparece aqui no formulário. */
-  aoConfirmar: (dados: DadosPagamento) => Promise<unknown>;
+  /** Versão da nota a que `saldo` pertence. */
+  versao: number;
+  /** Recebe o pagamento e a versão da nota quando o formulário abriu. Rejeita quando o pagamento não entra; o erro aparece aqui no formulário. */
+  aoConfirmar: (dados: DadosPagamento, versao: number) => Promise<unknown>;
   aoCancelar: () => void;
 }
 
 const ERRO_NUMERO = "Número inválido.";
 
 /** Formulário de pagamento da nota: sobe de baixo, dentro da gaveta. */
-export function Receber({ saldo, aoConfirmar, aoCancelar }: Props) {
+export function Receber({ saldo, versao, aoConfirmar, aoCancelar }: Props) {
   const formulario = useRef<HTMLFormElement>(null);
   const [valor, setValor] = useState(() => formatarDinheiro(saldo));
+  // A versão da nota quando o formulário abriu: a nota pode ser recarregada com ele aberto.
+  const [versaoAoAbrir] = useState(versao);
   const [forma, setForma] = useState<FormaPagamento>("DINHEIRO");
   const [erroDoValor, setErroDoValor] = useState<string>();
   const [falha, setFalha] = useState<string>();
@@ -47,7 +51,7 @@ export function Receber({ saldo, aoConfirmar, aoCancelar }: Props) {
     if (decimal === null) return;
     setEnviando(true);
     try {
-      await aoConfirmar({ valor: decimal, forma });
+      await aoConfirmar({ valor: decimal, forma }, versaoAoAbrir);
     } catch (erro) {
       setFalha(mensagemDeErro(erro));
       if (erro instanceof ErroApi) setErroDoValor(erro.campos.valor);

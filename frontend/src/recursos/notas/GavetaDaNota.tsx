@@ -176,9 +176,10 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
         {modo === "corrigir" ? (
           <Correcao
             itens={nota.itens}
+            versao={nota.versao}
             aoCancelar={() => setModo("ver")}
-            aoSalvar={(itens) =>
-              corrigir.mutateAsync(itens).then((corrigida) => {
+            aoSalvar={(itens, versao) =>
+              corrigir.mutateAsync({ itens, versao }).then((corrigida) => {
                 abrirImpressao(corrigida.imprimir_url);
                 setModo("ver");
               }, falharNoModo)
@@ -206,9 +207,10 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
         {modo === "receber" && (
           <Receber
             saldo={nota.saldo}
+            versao={nota.versao}
             aoCancelar={() => setModo("ver")}
-            aoConfirmar={(dados) =>
-              receber.mutateAsync(dados).then(({ recibo_url }) => {
+            aoConfirmar={(dados, versao) =>
+              receber.mutateAsync({ ...dados, versao }).then(({ recibo_url }) => {
                 abrirImpressao(recibo_url);
                 setModo("ver");
               }, falharNoModo)

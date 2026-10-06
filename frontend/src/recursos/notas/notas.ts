@@ -48,7 +48,7 @@ function gravarNota(cliente: QueryClient, codigo: string, nota: Nota) {
   void invalidarListas(cliente, nota.cliente.codigo);
 }
 
-/** Mutação que devolve a nota atualizada: envia a versão do cache e grava a resposta no lugar. */
+/** Mutação que devolve a nota atualizada: envia a versão do cache (ou a que o corpo trouxer) e grava a resposta no lugar. */
 function useMutacaoDaNota<V>(codigo: string, pedido: (dados: V) => { metodo: Metodo; sufixo: string; corpo?: object }) {
   const cliente = useQueryClient();
   return useMutation({
@@ -77,22 +77,27 @@ export function useFechar(codigo: string) {
   return useMutacaoDaNota<void>(codigo, () => ({ metodo: "POST", sufixo: "/fechar" }));
 }
 
-/** Corrige a nota: a lista enviada substitui os itens; linha toda em branco é ignorada pelo servidor. */
+/**
+ * Corrige a nota: a lista enviada substitui os itens; linha toda em branco é ignorada pelo servidor.
+ * `versao` é a da nota que o formulário copiou, não a do cache: se a nota mudou desde então, o servidor recusa (409).
+ */
 export function useCorrigir(codigo: string) {
-  return useMutacaoDaNota(codigo, (itens: DadosItem[]) => ({ metodo: "PUT", sufixo: "/itens", corpo: { itens } }));
+  return useMutacaoDaNota(codigo, (correcao: { itens: DadosItem[]; versao: number }) => ({
+    metodo: "PUT",
+    sufixo: "/itens",
+    corpo: correcao,
+  }));
 }
 
-/** Recebe um pagamento. A resposta traz a nota atualizada e o endereço do recibo a imprimir. */
+/**
+ * Recebe um pagamento. A resposta traz a nota atualizada e o endereço do recibo a imprimir.
+ * `versao` é a da nota quando o formulário abriu, não a do cache.
+ */
 export function useReceber(codigo: string) {
   const cliente = useQueryClient();
   return useMutation({
-    mutationFn: (dados: DadosPagamento) => {
-      const versao = notaNoCache(cliente, codigo)?.versao;
-      return requisitar<{ recibo_url: string; nota: Nota }>("POST", `${caminhoDaNota(codigo)}/pagamentos`, {
-        versao,
-        ...dados,
-      });
-    },
+    mutationFn: (pagamento: DadosPagamento & { versao: number }) =>
+      requisitar<{ recibo_url: string; nota: Nota }>("POST", `${caminhoDaNota(codigo)}/pagamentos`, pagamento),
     onSuccess: ({ nota }) => gravarNota(cliente, codigo, nota),
   });
 }

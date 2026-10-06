@@ -8,6 +8,7 @@ from fiado.api.serializadores import (
     dinheiro,
     linhas_de_clientes,
     nota_completa,
+    recibo_url,
 )
 from fiado.api.validacao import DadosInvalidos, decimal, opcao, texto
 from fiado.busca import filtrar_clientes
@@ -82,6 +83,6 @@ def pagar_divida(request, codigo):
         cliente=cliente, valor=valor, forma=forma, usuario=request.user, divida_esperada=esperada
     )
     return {
-        "recibo_url": f"/recibos/lote/{pagamentos[0].lote}/",
+        "recibo_url": recibo_url(pagamentos[0]),
         "cliente": cliente_detalhe(Cliente.objects.get(pk=cliente.pk)),
     }

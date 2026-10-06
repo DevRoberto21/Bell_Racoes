@@ -10,8 +10,10 @@ import "./Correcao.css";
 
 interface Props {
   itens: ItemNota[];
-  /** Rejeita quando a correção não entra; o erro aparece aqui no formulário. */
-  aoSalvar: (itens: DadosItem[]) => Promise<unknown>;
+  /** Versão da nota a que `itens` pertence. */
+  versao: number;
+  /** Recebe a lista e a versão da nota que o formulário copiou ao abrir. Rejeita quando a correção não entra; o erro aparece aqui no formulário. */
+  aoSalvar: (itens: DadosItem[], versao: number) => Promise<unknown>;
   aoCancelar: () => void;
 }
 
@@ -29,7 +31,7 @@ const COLUNAS: { campo: CampoDoItem; rotulo: string; numerico: boolean }[] = [
 const chaveDoErro = (linha: number, campo: CampoDoItem) => `itens.${linha}.${campo}`;
 
 /** Os itens da nota como campos editáveis, no lugar da lista. */
-export function Correcao({ itens, aoSalvar, aoCancelar }: Props) {
+export function Correcao({ itens, versao, aoSalvar, aoCancelar }: Props) {
   const formulario = useRef<HTMLFormElement>(null);
   const idDosErros = useId();
   // As linhas guardam o texto como aparece na tela; nunca saem do lugar, então o índice identifica cada uma.
@@ -40,6 +42,8 @@ export function Correcao({ itens, aoSalvar, aoCancelar }: Props) {
       preco_unitario: formatarDinheiro(item.preco_unitario),
     })),
   );
+  // A versão da nota copiada acima: a nota pode ser recarregada com o formulário aberto, as linhas não.
+  const [versaoCopiada] = useState(versao);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [falha, setFalha] = useState<string>();
   const [enviando, setEnviando] = useState(false);
@@ -77,7 +81,7 @@ export function Correcao({ itens, aoSalvar, aoCancelar }: Props) {
     if (Object.keys(invalidos).length > 0) return;
     setEnviando(true);
     try {
-      await aoSalvar(lista);
+      await aoSalvar(lista, versaoCopiada);
     } catch (erro) {
       setFalha(mensagemDeErro(erro));
       if (erro instanceof ErroApi) setErros(erro.campos);
