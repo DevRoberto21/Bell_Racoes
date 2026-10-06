@@ -200,6 +200,7 @@ def test_pagas(logado, cliente, usuario):
     corpo = logado.get("/api/pagas").json()
     assert [n["codigo"] for n in corpo] == ["01-01"]
     assert corpo[0]["quitada_em"] is not None
+    assert corpo[0]["imprimir_url"] == "/notas/1-1/imprimir/"
 
 
 def test_leitura_exige_login(client, cliente):

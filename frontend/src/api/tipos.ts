@@ -35,6 +35,7 @@ export interface NotaResumo {
   nivel_alerta: number;
   total: string;
   saldo: string;
+  imprimir_url: string;
 }
 
 export interface ClienteDetalhe extends ClienteLinha {
@@ -79,7 +80,6 @@ export interface Nota extends NotaResumo {
   itens: ItemNota[];
   pagamentos: Pagamento[];
   acoes: AcoesDaNota;
-  imprimir_url: string;
 }
 
 export interface Painel {

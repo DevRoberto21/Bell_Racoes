@@ -74,6 +74,7 @@ def _resumo(nota, total, saldo, hoje):
         "nivel_alerta": nota.nivel_alerta(hoje),
         "total": dinheiro(total),
         "saldo": dinheiro(saldo),
+        "imprimir_url": f"/notas/{cliente.codigo}-{nota.numero}/imprimir/",
     }
 
 
@@ -129,5 +130,4 @@ def nota_completa(nota, hoje=None):
             for pagamento in pagamentos
         ],
         "acoes": acoes_da_nota(nota, bool(itens), bool(pagamentos), saldo),
-        "imprimir_url": f"/notas/{nota.cliente.codigo}-{nota.numero}/imprimir/",
     }

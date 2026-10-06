@@ -1,5 +1,4 @@
 import { formatarData } from "../../api/data";
-import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Dinheiro } from "../../componentes/Dinheiro";
 import { EstadoVazio } from "../../componentes/EstadoVazio";
@@ -7,14 +6,13 @@ import { FalhaDeConsulta } from "../../componentes/FalhaDeConsulta";
 import { Lista } from "../../componentes/Lista";
 import { useTitulo } from "../estrutura/titulo";
 import { useAbrirNota } from "../notas/abrirNota";
-import { mensagemDeErro } from "../notas/notas";
-import { usePagas, useReimprimir } from "./pagas";
+import { abrirImpressao } from "../notas/imprimir";
+import { usePagas } from "./pagas";
 import "./TelaPagas.css";
 
 export function TelaPagas() {
   useTitulo("Contas pagas");
   const pagas = usePagas();
-  const reimprimir = useReimprimir();
   const abrirNota = useAbrirNota();
 
   return (
@@ -26,7 +24,6 @@ export function TelaPagas() {
       {pagas.isError && (
         <FalhaDeConsulta erro={pagas.error} mensagem="Não foi possível carregar as contas pagas." aoTentar={() => void pagas.refetch()} />
       )}
-      {reimprimir.isError && <Aviso tipo="erro">{mensagemDeErro(reimprimir.error)}</Aviso>}
       {pagas.data &&
         (pagas.data.length === 0 ? (
           <EstadoVazio>Nenhuma nota quitada nos últimos 7 dias.</EstadoVazio>
@@ -37,11 +34,7 @@ export function TelaPagas() {
                 key={nota.codigo}
                 onAbrir={() => abrirNota(nota.codigo)}
                 acao={
-                  <Botao
-                    variante="contorno"
-                    disabled={reimprimir.isPending && reimprimir.variables === nota.codigo}
-                    onClick={() => reimprimir.mutate(nota.codigo)}
-                  >
+                  <Botao variante="contorno" onClick={() => abrirImpressao(nota.imprimir_url)}>
                     Reimprimir
                   </Botao>
                 }

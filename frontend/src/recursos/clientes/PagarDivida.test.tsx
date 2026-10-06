@@ -29,6 +29,7 @@ function nota(codigo: string, saldo: string): NotaResumo {
     nivel_alerta: 2,
     total: saldo,
     saldo,
+    imprimir_url: "/notas/12-1/imprimir/",
   };
 }
 

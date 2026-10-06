@@ -22,6 +22,7 @@ function nota(codigo: string, extra: Partial<NotaResumo> = {}): NotaResumo {
     nivel_alerta: 2,
     total: "100.00",
     saldo: "96.40",
+    imprimir_url: "/notas/12-1/imprimir/",
     ...extra,
   };
 }

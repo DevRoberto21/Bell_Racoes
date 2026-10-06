@@ -1,8 +1,8 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { NotaResumo } from "../../api/tipos";
-import { notaDeTeste, simularFetch } from "../../teste/notas";
+import { simularFetch } from "../../teste/notas";
 import { renderizarComApp, responder } from "../../teste/renderizar";
 import { TelaPagas } from "./TelaPagas";
 
@@ -22,6 +22,7 @@ function paga(codigo: string, extra: Partial<NotaResumo> = {}): NotaResumo {
     nivel_alerta: 0,
     total: "160.00",
     saldo: "0.00",
+    imprimir_url: `/notas/${Number(codigo.split("-")[0])}-${Number(codigo.split("-")[1])}/imprimir/`,
     ...extra,
   };
 }
@@ -90,35 +91,21 @@ describe("TelaPagas", () => {
     expect(abrirJanela).not.toHaveBeenCalled();
   });
 
-  it("Reimprimir chama window.open com o imprimir_url da nota, sem abrir a gaveta", async () => {
+  it("Reimprimir chama window.open com o imprimir_url da linha, sem requisição e sem abrir a gaveta", async () => {
     const abrirJanela = vi.spyOn(window, "open").mockReturnValue(null);
-    const api = simularFetch((chave) => {
-      if (chave === PAGAS) return responder(duas());
-      if (chave === "GET /api/notas/12-3") return responder(notaDeTeste({ codigo: "12-03", imprimir_url: "/notas/12-3/imprimir/" }));
-      return undefined;
-    });
+    const api = simularFetch((chave) => (chave === PAGAS ? responder(duas()) : undefined));
     renderizarComApp(<TelaPagas />, { rota: "/pagas" });
     const linhas = await screen.findAllByRole("listitem");
-    await userEvent.click(within(linhas[1]).getByRole("button", { name: "Reimprimir" }));
+    const reimprimir = within(linhas[1]).getByRole("button", { name: "Reimprimir" });
 
-    await waitFor(() => expect(abrirJanela).toHaveBeenCalledWith("/notas/12-3/imprimir/", "_blank", "noopener"));
+    // A janela abre dentro do próprio clique: nada assíncrono entre o gesto e o window.open.
+    fireEvent.click(reimprimir);
     expect(abrirJanela).toHaveBeenCalledTimes(1);
-    expect(api.quantas("GET /api/notas/12-3")).toBe(1);
+    expect(abrirJanela).toHaveBeenCalledWith("/notas/12-3/imprimir/", "_blank", "noopener");
+    expect(api.chamadas()).toEqual([PAGAS]);
+    expect(api.chamadas().some((chamada) => chamada.startsWith("GET /api/notas/"))).toBe(false);
     expect(screen.getByTestId("local")).toHaveTextContent(/^\/pagas$/);
-  });
-
-  it("falha ao buscar a nota para reimprimir mostra o aviso e não abre janela", async () => {
-    const abrirJanela = vi.spyOn(window, "open").mockReturnValue(null);
-    simularFetch((chave) => {
-      if (chave === PAGAS) return responder(duas());
-      if (chave === "GET /api/notas/1-1") return Promise.reject(new TypeError("sem rede"));
-      return undefined;
-    });
-    renderizarComApp(<TelaPagas />, { rota: "/pagas" });
-    const linhas = await screen.findAllByRole("listitem");
-    await userEvent.click(within(linhas[0]).getByRole("button", { name: "Reimprimir" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Sem conexão com o servidor.");
-    expect(abrirJanela).not.toHaveBeenCalled();
+    expect(reimprimir).toBeEnabled();
   });
 
   it("falha de rede mostra o aviso com Tentar de novo, que busca outra vez", async () => {
