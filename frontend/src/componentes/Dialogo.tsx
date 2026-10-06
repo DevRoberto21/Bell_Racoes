@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Botao } from "./Botao";
+import { desempilhar, empilhar, estaNoTopo } from "./pilhaDeDialogos";
 import "./Dialogo.css";
 
 const FOCAVEIS = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
@@ -15,6 +16,7 @@ interface Props {
 export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
   const idTitulo = useId();
   const caixa = useRef<HTMLDivElement>(null);
+  const identidade = useRef(Symbol("dialogo"));
   const aoFecharAtual = useRef(aoFechar);
   useEffect(() => {
     aoFecharAtual.current = aoFechar;
@@ -22,6 +24,7 @@ export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
 
   useEffect(() => {
     if (!aberto) return;
+    const id = identidade.current;
     const origem = document.activeElement as HTMLElement | null;
     // Ordena pela posição no documento: alguns motores de seletor devolvem na ordem da lista de seletores.
     const focaveis = () =>
@@ -30,7 +33,9 @@ export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
       );
     (focaveis()[0] ?? caixa.current)?.focus();
 
+    empilhar(id);
     const aoTeclar = (e: KeyboardEvent) => {
+      if (!estaNoTopo(id)) return;
       if (e.key === "Escape") {
         e.preventDefault();
         aoFecharAtual.current();
@@ -57,6 +62,7 @@ export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
     document.addEventListener("keydown", aoTeclar);
     return () => {
       document.removeEventListener("keydown", aoTeclar);
+      desempilhar(id);
       origem?.focus();
     };
   }, [aberto]);
@@ -67,7 +73,7 @@ export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
       className="dialogo__veu"
       data-testid="veu"
       onMouseDown={(e) => {
-        if (e.target !== e.currentTarget) return;
+        if (e.target !== e.currentTarget || !estaNoTopo(identidade.current)) return;
         // Sem isto o navegador move o foco para o corpo da página depois do fechamento, perdendo o retorno ao gatilho.
         e.preventDefault();
         aoFechar();
@@ -92,17 +98,19 @@ interface PropsConfirmacao {
   aoConfirmar: () => void;
   aoFechar: () => void;
   perigo?: boolean;
+  /** Enquanto verdadeiro, confirmar fica desabilitado e nada fecha o diálogo. */
+  carregando?: boolean;
 }
 
-function Confirmacao({ aberto, titulo, mensagem, rotuloConfirmar, aoConfirmar, aoFechar, perigo }: PropsConfirmacao) {
+function Confirmacao({ aberto, titulo, mensagem, rotuloConfirmar, aoConfirmar, aoFechar, perigo, carregando = false }: PropsConfirmacao) {
   return (
-    <Dialogo aberto={aberto} titulo={titulo} aoFechar={aoFechar}>
+    <Dialogo aberto={aberto} titulo={titulo} aoFechar={carregando ? () => {} : aoFechar}>
       <p className="dialogo__mensagem">{mensagem}</p>
       <div className="dialogo__acoes">
-        <Botao variante="contorno" onClick={aoFechar}>
+        <Botao variante="contorno" onClick={aoFechar} disabled={carregando}>
           Cancelar
         </Botao>
-        <Botao variante={perigo ? "perigo" : "principal"} onClick={aoConfirmar}>
+        <Botao variante={perigo ? "perigo" : "principal"} onClick={aoConfirmar} carregando={carregando}>
           {rotuloConfirmar}
         </Botao>
       </div>

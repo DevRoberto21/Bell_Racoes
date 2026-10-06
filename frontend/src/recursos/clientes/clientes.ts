@@ -57,15 +57,18 @@ export function useEditarCliente(codigo: string) {
   });
 }
 
+/** Exclui o cliente. Quem chama navega para fora da tela dele e só então chama `limpar`. */
 export function useExcluirCliente(codigo: string) {
   const cliente = useQueryClient();
-  return useMutation({
+  const excluir = useMutation({
     mutationFn: () => requisitar<object>("DELETE", `/api/clientes/${codigo}`),
-    onSuccess: () => {
-      cliente.removeQueries({ queryKey: ["cliente", codigo] });
-      return invalidar(cliente);
-    },
   });
+  /** Descarta o cache do cliente excluído e atualiza listas e painel; chamar depois de sair da tela dele. */
+  function limpar() {
+    cliente.removeQueries({ queryKey: ["cliente", codigo] });
+    return invalidar(cliente);
+  }
+  return { ...excluir, limpar };
 }
 
 export function useCriarNota(codigo: string) {

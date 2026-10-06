@@ -95,3 +95,88 @@ describe("Dialogo.Confirmacao", () => {
     expect(aoFechar).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("Dialogo.Confirmacao carregando", () => {
+  it("com carregando, confirmar fica desabilitado e Esc, cancelar e véu não fecham", async () => {
+    const usuario = userEvent.setup();
+    const aoFechar = vi.fn();
+    render(
+      <Dialogo.Confirmacao
+        aberto
+        carregando
+        titulo="Excluir cliente"
+        mensagem="Certeza?"
+        rotuloConfirmar="Excluir"
+        aoConfirmar={() => {}}
+        aoFechar={aoFechar}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Excluir" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    await usuario.keyboard("{Escape}");
+    await usuario.click(screen.getByTestId("veu"));
+    expect(aoFechar).not.toHaveBeenCalled();
+  });
+});
+
+function Empilhado() {
+  const [baixo, definirBaixo] = useState(true);
+  const [alto, definirAlto] = useState(false);
+  return (
+    <>
+      <Dialogo aberto={baixo} titulo="Diálogo de baixo" aoFechar={() => definirBaixo(false)}>
+        <button type="button" onClick={() => definirAlto(true)}>
+          Abrir confirmação
+        </button>
+        <button type="button">Botão de baixo</button>
+      </Dialogo>
+      <Dialogo.Confirmacao
+        aberto={alto}
+        titulo="Confirmar de cima"
+        mensagem="Certeza?"
+        rotuloConfirmar="Sim"
+        aoConfirmar={() => {}}
+        aoFechar={() => definirAlto(false)}
+      />
+    </>
+  );
+}
+
+describe("Dialogo empilhado", () => {
+  async function abrirConfirmacao() {
+    const usuario = userEvent.setup();
+    render(<Empilhado />);
+    const gatilho = screen.getByRole("button", { name: "Abrir confirmação" });
+    await usuario.click(gatilho);
+    return { usuario, gatilho };
+  }
+
+  it("o primeiro Esc fecha só a confirmação; o segundo fecha o diálogo de baixo", async () => {
+    const { usuario } = await abrirConfirmacao();
+    expect(screen.getAllByRole("dialog")).toHaveLength(2);
+    await usuario.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "Confirmar de cima" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Diálogo de baixo" })).toBeInTheDocument();
+    await usuario.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("Tab dentro do de cima nunca leva o foco ao de baixo", async () => {
+    const { usuario } = await abrirConfirmacao();
+    const de = screen.getByRole("dialog", { name: "Confirmar de cima" });
+    for (let i = 0; i < 4; i++) {
+      await usuario.tab();
+      expect(de).toContainElement(document.activeElement as HTMLElement);
+    }
+    for (let i = 0; i < 4; i++) {
+      await usuario.tab({ shift: true });
+      expect(de).toContainElement(document.activeElement as HTMLElement);
+    }
+  });
+
+  it("ao fechar o de cima, o foco volta ao elemento do de baixo que o abriu", async () => {
+    const { usuario, gatilho } = await abrirConfirmacao();
+    await usuario.keyboard("{Escape}");
+    expect(gatilho).toHaveFocus();
+  });
+});

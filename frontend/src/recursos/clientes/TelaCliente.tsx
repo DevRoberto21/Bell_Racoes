@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ErroApi } from "../../api/http";
 import type { TipoNota } from "../../api/tipos";
@@ -30,6 +30,18 @@ export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
   const [editando, setEditando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const [falha, setFalha] = useState<string | null>(null);
+  const excluido = useRef(false);
+  const limparAtual = useRef(excluir.limpar);
+  useEffect(() => {
+    limparAtual.current = excluir.limpar;
+  });
+  // Só depois que a tela saiu do ar (a navegação já aconteceu) o cache do cliente excluído é descartado.
+  useEffect(
+    () => () => {
+      if (excluido.current) void limparAtual.current();
+    },
+    [],
+  );
 
   if (cliente.error instanceof ErroApi && cliente.error.status === 404) {
     return (
@@ -142,10 +154,14 @@ export function TelaCliente({ abrirPagarDivida = () => {} }: Props) {
         mensagem={`Excluir ${c.nome}? Isto não pode ser desfeito.`}
         rotuloConfirmar="Excluir"
         perigo
+        carregando={excluir.isPending}
         aoFechar={() => setExcluindo(false)}
         aoConfirmar={() =>
           excluir.mutate(undefined, {
-            onSuccess: () => navegar("/clientes"),
+            onSuccess: () => {
+              excluido.current = true;
+              navegar("/clientes");
+            },
             onError: (e) => {
               setExcluindo(false);
               setFalha(mensagem(e));

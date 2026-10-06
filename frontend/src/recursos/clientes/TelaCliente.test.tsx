@@ -177,6 +177,39 @@ describe("TelaCliente", () => {
     expect(fetchSimulado.mock.calls.some(([, o]) => o?.method === "DELETE")).toBe(true);
   });
 
+  it("dois cliques rápidos em Excluir mandam um único DELETE", async () => {
+    let liberar: () => void = () => {};
+    const pendente = new Promise<void>((resolve) => (liberar = resolve));
+    simular(cliente({ pode_excluir: true, notas: [], divida: "0.00" }), (chave) =>
+      chave === "DELETE /api/clientes/12" ? pendente.then(() => responder({})) : undefined,
+    );
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Excluir cliente" }));
+    const confirmar = screen.getByRole("button", { name: "Excluir" });
+    await usuario.click(confirmar);
+    await usuario.click(confirmar);
+    liberar();
+    expect(await screen.findByText("Lista de clientes")).toBeInTheDocument();
+    expect(fetchSimulado.mock.calls.filter(([, o]) => o?.method === "DELETE")).toHaveLength(1);
+  });
+
+  it("depois do DELETE não busca o cliente excluído nem mostra 'não encontrado'", async () => {
+    simular(cliente({ pode_excluir: true, notas: [], divida: "0.00" }), (chave) =>
+      chave === "DELETE /api/clientes/12" ? responder({}) : undefined,
+    );
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Excluir cliente" }));
+    await usuario.click(screen.getByRole("button", { name: "Excluir" }));
+    expect(await screen.findByText("Lista de clientes")).toBeInTheDocument();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const chamadas = fetchSimulado.mock.calls.map(([url, o]) => `${o?.method ?? "GET"} ${url}`);
+    const depois = chamadas.slice(chamadas.indexOf("DELETE /api/clientes/12") + 1);
+    expect(depois.filter((c) => c === "GET /api/clientes/12")).toHaveLength(0);
+    expect(screen.queryByText("Cliente não encontrado.")).not.toBeInTheDocument();
+  });
+
   it("cliente inexistente mostra a mensagem e um link para a lista", async () => {
     simular(cliente(), (chave) =>
       chave === "GET /api/clientes/12" ? responder({ erro: "Não encontrado." }, 404) : undefined,
