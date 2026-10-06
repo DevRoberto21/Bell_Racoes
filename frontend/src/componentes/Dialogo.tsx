@@ -1,10 +1,8 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Botao } from "./Botao";
-import { desempilhar, empilhar, estaNoTopo } from "./pilhaDeDialogos";
+import { useCamadaModal } from "./useCamadaModal";
 import "./Dialogo.css";
-
-const FOCAVEIS = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
 
 interface Props {
   aberto: boolean;
@@ -16,56 +14,7 @@ interface Props {
 export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
   const idTitulo = useId();
   const caixa = useRef<HTMLDivElement>(null);
-  const identidade = useRef(Symbol("dialogo"));
-  const aoFecharAtual = useRef(aoFechar);
-  useEffect(() => {
-    aoFecharAtual.current = aoFechar;
-  });
-
-  useEffect(() => {
-    if (!aberto) return;
-    const id = identidade.current;
-    const origem = document.activeElement as HTMLElement | null;
-    // Ordena pela posição no documento: alguns motores de seletor devolvem na ordem da lista de seletores.
-    const focaveis = () =>
-      Array.from(caixa.current?.querySelectorAll<HTMLElement>(FOCAVEIS) ?? []).sort((a, b) =>
-        a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
-      );
-    (focaveis()[0] ?? caixa.current)?.focus();
-
-    empilhar(id);
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (!estaNoTopo(id)) return;
-      if (e.key === "Escape") {
-        e.preventDefault();
-        aoFecharAtual.current();
-        return;
-      }
-      if (e.key !== "Tab") return;
-      const lista = focaveis();
-      if (lista.length === 0) {
-        e.preventDefault();
-        return;
-      }
-      const primeiro = lista[0];
-      const ultimo = lista[lista.length - 1];
-      const ativo = document.activeElement;
-      const fora = !caixa.current?.contains(ativo);
-      if (e.shiftKey && (ativo === primeiro || fora)) {
-        e.preventDefault();
-        ultimo.focus();
-      } else if (!e.shiftKey && (ativo === ultimo || fora)) {
-        e.preventDefault();
-        primeiro.focus();
-      }
-    };
-    document.addEventListener("keydown", aoTeclar);
-    return () => {
-      document.removeEventListener("keydown", aoTeclar);
-      desempilhar(id);
-      origem?.focus();
-    };
-  }, [aberto]);
+  const noTopo = useCamadaModal(aberto, caixa, aoFechar);
 
   if (!aberto) return null;
   return createPortal(
@@ -73,7 +22,7 @@ export function Dialogo({ aberto, titulo, aoFechar, children }: Props) {
       className="dialogo__veu"
       data-testid="veu"
       onMouseDown={(e) => {
-        if (e.target !== e.currentTarget || !estaNoTopo(identidade.current)) return;
+        if (e.target !== e.currentTarget || !noTopo()) return;
         // Sem isto o navegador move o foco para o corpo da página depois do fechamento, perdendo o retorno ao gatilho.
         e.preventDefault();
         aoFechar();
