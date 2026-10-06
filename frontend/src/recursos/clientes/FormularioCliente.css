@@ -1,0 +1,2 @@
+.formulario-cliente { display: flex; flex-direction: column; gap: var(--espaco-3); }
+.formulario-cliente__acoes { display: flex; justify-content: flex-end; gap: var(--espaco-2); margin-top: var(--espaco-2); }

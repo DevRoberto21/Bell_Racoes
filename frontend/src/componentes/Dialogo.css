@@ -1,0 +1,32 @@
+.dialogo__veu {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--espaco-4);
+  background: var(--cor-veu);
+  animation: dialogo-veu var(--tempo-base) ease backwards;
+}
+
+.dialogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  width: min(480px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  animation: dialogo-entrada var(--tempo-base) var(--curva-mola) backwards;
+}
+.dialogo:focus { outline: none; }
+
+.dialogo__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.dialogo__mensagem { color: var(--cor-texto-secundario); }
+.dialogo__acoes { display: flex; justify-content: flex-end; gap: var(--espaco-2); }
+
+@keyframes dialogo-veu { from { opacity: 0; } }
+@keyframes dialogo-entrada { from { opacity: 0; transform: scale(0.96); } }

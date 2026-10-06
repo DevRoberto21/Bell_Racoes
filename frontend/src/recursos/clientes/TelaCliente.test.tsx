@@ -1,0 +1,188 @@
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Route, Routes } from "react-router";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ClienteDetalhe, Nota, NotaResumo } from "../../api/tipos";
+import { renderizarComApp, responder } from "../../teste/renderizar";
+import { TelaCliente } from "./TelaCliente";
+
+function nota(codigo: string, extra: Partial<NotaResumo> = {}): NotaResumo {
+  return {
+    codigo,
+    cliente: { codigo: 12, codigo_formatado: "12", nome: "José Pereira" },
+    numero: Number(codigo.split("-")[1]),
+    tipo: "UNICA",
+    tipo_rotulo: "Única",
+    situacao: "ABERTA",
+    situacao_rotulo: "Aberta",
+    criada_em: "2026-09-10T10:00:00Z",
+    quitada_em: null,
+    editada: false,
+    dias_em_aberto: 14,
+    nivel_alerta: 2,
+    total: "100.00",
+    saldo: "96.40",
+    ...extra,
+  };
+}
+
+function cliente(extra: Partial<ClienteDetalhe> = {}): ClienteDetalhe {
+  return {
+    codigo: 12,
+    codigo_formatado: "12",
+    nome: "José Pereira",
+    apelido: "Zé",
+    telefone: "11 99999-0000",
+    divida: "241.10",
+    notas_abertas: 2,
+    notas: [nota("12-01"), nota("12-03", { editada: true })],
+    tem_continua_aberta: false,
+    pode_excluir: false,
+    ...extra,
+  };
+}
+
+let fetchSimulado: ReturnType<typeof vi.fn>;
+
+function simular(dados: ClienteDetalhe, extra: (chave: string) => unknown = () => undefined) {
+  fetchSimulado = vi.fn(async (url: string, opcoes?: RequestInit) => {
+    const chave = `${opcoes?.method ?? "GET"} ${url}`;
+    const especial = extra(chave);
+    if (especial !== undefined) return especial;
+    if (chave === "GET /api/clientes/12") return responder(dados);
+    throw new Error(`requisição inesperada: ${chave}`);
+  });
+  vi.stubGlobal("fetch", fetchSimulado);
+}
+
+function tela() {
+  return renderizarComApp(
+    <Routes>
+      <Route path="/clientes" element={<p>Lista de clientes</p>} />
+      <Route path="/clientes/:codigo" element={<TelaCliente />} />
+    </Routes>,
+    { rota: "/clientes/12" },
+  );
+}
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("TelaCliente", () => {
+  it("mostra cabeçalho, telefone, dívida e as notas em aberto", async () => {
+    simular(cliente());
+    tela();
+    expect(await screen.findByRole("heading", { name: "12 · José Pereira (Zé)" })).toBeInTheDocument();
+    expect(screen.getByText("11 99999-0000")).toBeInTheDocument();
+    expect(screen.getByText("R$ 241,10")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Notas em aberto" })).toBeInTheDocument();
+    const editada = screen.getByRole("button", { name: /12-03/ });
+    expect(editada).toHaveTextContent("Editado");
+    expect(editada).toHaveTextContent("14 dias");
+    expect(editada).toHaveTextContent("R$ 96,40");
+    expect(screen.getByRole("button", { name: /12-01/ })).not.toHaveTextContent("Editado");
+  });
+
+  it("clicar numa nota abre a gaveta dela", async () => {
+    simular(cliente());
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: /12-03/ }));
+    expect(screen.getByTestId("local")).toHaveTextContent("/clientes/12?nota=12-03");
+  });
+
+  it("nova nota contínua fica desabilitada, com explicação, quando já existe uma aberta", async () => {
+    simular(cliente({ tem_continua_aberta: true }));
+    tela();
+    const botao = await screen.findByRole("button", { name: "Nova nota contínua" });
+    expect(botao).toBeDisabled();
+    expect(botao).toHaveAttribute("title", "Já existe uma nota contínua aberta");
+  });
+
+  it("nova nota contínua fica habilitada quando não há contínua aberta", async () => {
+    simular(cliente());
+    tela();
+    expect(await screen.findByRole("button", { name: "Nova nota contínua" })).toBeEnabled();
+  });
+
+  it("a frase do rascunho só aparece havendo rascunho na lista", async () => {
+    simular(cliente({ notas: [nota("12-01"), nota("12-04", { situacao: "RASCUNHO", nivel_alerta: 0 })] }));
+    const { unmount } = tela();
+    expect(
+      await screen.findByText("Rascunho ainda não é dívida: só entra na conta depois de finalizado."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /12-04/ })).toHaveTextContent("Rascunho");
+    unmount();
+    simular(cliente());
+    tela();
+    await screen.findByRole("heading", { name: "Notas em aberto" });
+    expect(screen.queryByText(/Rascunho ainda não é dívida/)).not.toBeInTheDocument();
+  });
+
+  it("Pagar dívida total só aparece com dívida diferente de 0.00", async () => {
+    simular(cliente({ divida: "0.00", notas: [], notas_abertas: 0 }));
+    const { unmount } = tela();
+    await screen.findByRole("heading", { name: "Notas em aberto" });
+    expect(screen.queryByRole("button", { name: "Pagar dívida total" })).not.toBeInTheDocument();
+    unmount();
+    simular(cliente());
+    tela();
+    expect(await screen.findByRole("button", { name: "Pagar dívida total" })).toBeInTheDocument();
+  });
+
+  it("criar nota única chama a API e abre a gaveta da nota criada", async () => {
+    const criada = { ...nota("12-05"), itens: [], pagamentos: [] } as unknown as Nota;
+    simular(cliente(), (chave) => (chave === "POST /api/clientes/12/notas" ? responder(criada) : undefined));
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Nova nota única" }));
+    const chamada = fetchSimulado.mock.calls.find(([, o]) => o?.method === "POST");
+    expect(JSON.parse(chamada![1].body)).toEqual({ tipo: "UNICA" });
+    expect(await screen.findByText("/clientes/12?nota=12-05", { selector: "output" })).toBeInTheDocument();
+  });
+
+  it("Editar cadastro abre o formulário preenchido e salva com PATCH", async () => {
+    simular(cliente(), (chave) =>
+      chave === "PATCH /api/clientes/12" ? responder(cliente({ nome: "José P." })) : undefined,
+    );
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Editar cadastro" }));
+    const nome = screen.getByLabelText("Nome");
+    expect(nome).toHaveValue("José Pereira");
+    await usuario.clear(nome);
+    await usuario.type(nome, "José P.");
+    await usuario.click(screen.getByRole("button", { name: "Salvar" }));
+    const chamada = fetchSimulado.mock.calls.find(([, o]) => o?.method === "PATCH");
+    expect(JSON.parse(chamada![1].body)).toEqual({ nome: "José P.", apelido: "Zé", telefone: "11 99999-0000" });
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("Excluir só aparece com pode_excluir e só chama DELETE depois da confirmação", async () => {
+    simular(cliente(), undefined);
+    const { unmount } = tela();
+    await screen.findByRole("heading", { name: "Notas em aberto" });
+    expect(screen.queryByRole("button", { name: "Excluir cliente" })).not.toBeInTheDocument();
+    unmount();
+
+    simular(cliente({ pode_excluir: true, notas: [], divida: "0.00" }), (chave) =>
+      chave === "DELETE /api/clientes/12" ? responder({}) : undefined,
+    );
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Excluir cliente" }));
+    expect(screen.getByRole("dialog", { name: "Excluir cliente" })).toBeInTheDocument();
+    expect(fetchSimulado.mock.calls.some(([, o]) => o?.method === "DELETE")).toBe(false);
+    await usuario.click(screen.getByRole("button", { name: "Excluir" }));
+    expect(await screen.findByText("Lista de clientes")).toBeInTheDocument();
+    expect(fetchSimulado.mock.calls.some(([, o]) => o?.method === "DELETE")).toBe(true);
+  });
+
+  it("cliente inexistente mostra a mensagem e um link para a lista", async () => {
+    simular(cliente(), (chave) =>
+      chave === "GET /api/clientes/12" ? responder({ erro: "Não encontrado." }, 404) : undefined,
+    );
+    tela();
+    expect(await screen.findByText("Cliente não encontrado.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voltar para a lista de clientes" })).toHaveAttribute("href", "/clientes");
+  });
+});
