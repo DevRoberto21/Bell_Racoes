@@ -1,0 +1,15 @@
+.campo { display: flex; flex-direction: column; gap: var(--espaco-1); }
+
+.campo__rotulo { font-size: var(--texto-pequeno); font-weight: 600; color: var(--cor-texto-secundario); }
+
+.campo__entrada {
+  min-height: 40px;
+  padding: 0 var(--espaco-3);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-controle);
+}
+
+.campo__entrada[aria-invalid="true"] { border-color: var(--cor-erro-texto); }
+
+.campo__erro { font-size: var(--texto-pequeno); color: var(--cor-erro-texto); }

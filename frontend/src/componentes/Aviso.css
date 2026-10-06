@@ -1,0 +1,8 @@
+.aviso {
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-controle);
+  font-size: var(--texto-pequeno);
+}
+
+.aviso--erro { background: var(--cor-erro-fundo); color: var(--cor-erro-texto); }
+.aviso--info { background: var(--cor-acao-suave); color: var(--cor-acao-suave-texto); }
