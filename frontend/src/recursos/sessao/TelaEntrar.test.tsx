@@ -98,4 +98,16 @@ describe("TelaEntrar", () => {
     concluir(responder(200, { usuario: { nome_de_usuario: "caixa1", nome: "F" } }));
     expect(await screen.findByText("Chegou em /")).toBeInTheDocument();
   });
+
+  it("falha de rede mostra o aviso e mantém o que foi digitado", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+    montar();
+    await userEvent.type(screen.getByLabelText("Usuário"), "caixa1");
+    await userEvent.type(screen.getByLabelText("Senha"), "segredo");
+    await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Sem conexão com o servidor.");
+    expect(screen.getByLabelText("Usuário")).toHaveValue("caixa1");
+    expect(screen.getByLabelText("Senha")).toHaveValue("segredo");
+  });
 });

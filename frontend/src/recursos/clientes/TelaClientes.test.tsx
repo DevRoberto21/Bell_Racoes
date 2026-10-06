@@ -53,6 +53,13 @@ afterEach(() => {
 });
 
 describe("TelaClientes", () => {
+  it("define o título da aba", async () => {
+    simular();
+    tela();
+    await screen.findByRole("heading", { name: "Clientes" });
+    expect(document.title).toBe("Clientes · Bell Rações");
+  });
+
   it("lista código, nome, apelido, notas abertas e dívida", async () => {
     simular();
     tela();

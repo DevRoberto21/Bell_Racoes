@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Campo } from "../../componentes/Campo";
+import { useTitulo } from "../estrutura/titulo";
 import { useEntrar } from "./sessao";
 import "./TelaEntrar.css";
 
@@ -12,6 +13,7 @@ function destinoSeguro(depois: string | null): string {
 }
 
 export function TelaEntrar() {
+  useTitulo("Entrar");
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [parametros] = useSearchParams();

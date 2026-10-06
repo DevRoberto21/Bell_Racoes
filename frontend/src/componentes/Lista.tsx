@@ -1,12 +1,20 @@
 import type { ReactNode } from "react";
 import "./Lista.css";
 
-function Item({ onAbrir, children }: { onAbrir: () => void; children: ReactNode }) {
+interface PropsDoItem {
+  onAbrir: () => void;
+  /** Ação própria da linha (um botão), ao lado dela: fica fora do botão que abre. */
+  acao?: ReactNode;
+  children: ReactNode;
+}
+
+function Item({ onAbrir, acao, children }: PropsDoItem) {
   return (
     <li className="lista__item">
       <button type="button" className="lista__linha" onClick={onAbrir}>
         {children}
       </button>
+      {acao}
     </li>
   );
 }

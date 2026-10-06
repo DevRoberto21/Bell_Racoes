@@ -1,6 +1,8 @@
-import { useId, useState, type KeyboardEvent } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router";
+import { useAtalho } from "../../atalhos/atalhos";
 import { Dinheiro } from "../../componentes/Dinheiro";
+import { haCamadaAberta } from "../../componentes/pilhaDeDialogos";
 import { useAbrirNota } from "../notas/abrirNota";
 import { useBusca } from "./useBusca";
 import "./Busca.css";
@@ -22,6 +24,13 @@ export function Busca() {
   const navegar = useNavigate();
   const abrirNota = useAbrirNota();
   const consulta = useBusca(texto);
+  const campo = useRef<HTMLInputElement>(null);
+  // Com gaveta ou diálogo aberto o foco fica preso lá dentro: o atalho não o tira de lá.
+  const focar = () => {
+    if (!haCamadaAberta()) campo.current?.focus();
+  };
+  useAtalho("/", focar);
+  useAtalho("F2", focar);
 
   const resultado = texto.trim() ? consulta.data : undefined;
   const opcoes: Opcao[] = [];
@@ -80,6 +89,7 @@ export function Busca() {
   return (
     <div className="busca">
       <input
+        ref={campo}
         type="search"
         className="busca__campo"
         role="combobox"

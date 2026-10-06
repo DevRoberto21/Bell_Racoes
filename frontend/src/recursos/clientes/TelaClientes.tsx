@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Dialogo } from "../../componentes/Dialogo";
 import { Dinheiro } from "../../componentes/Dinheiro";
 import { EstadoVazio } from "../../componentes/EstadoVazio";
+import { FalhaDeConsulta } from "../../componentes/FalhaDeConsulta";
 import { Lista } from "../../componentes/Lista";
+import { useTitulo } from "../estrutura/titulo";
 import { useClientes, useCriarCliente } from "./clientes";
 import { FormularioCliente } from "./FormularioCliente";
 import "./TelaClientes.css";
 
 export function TelaClientes() {
+  useTitulo("Clientes");
   const [filtro, setFiltro] = useState("");
   const [criando, setCriando] = useState(false);
   const clientes = useClientes(filtro);
@@ -41,7 +43,9 @@ export function TelaClientes() {
           }}
         />
       </div>
-      {clientes.isError && <Aviso tipo="erro">Não foi possível carregar os clientes.</Aviso>}
+      {clientes.isError && (
+        <FalhaDeConsulta erro={clientes.error} mensagem="Não foi possível carregar os clientes." aoTentar={() => void clientes.refetch()} />
+      )}
       {clientes.data &&
         (clientes.data.length === 0 ? (
           <EstadoVazio>Nenhum cliente encontrado.</EstadoVazio>

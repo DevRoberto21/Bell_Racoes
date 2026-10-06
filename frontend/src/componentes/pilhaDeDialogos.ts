@@ -11,6 +11,11 @@ export function desempilhar(id: symbol) {
   if (posicao >= 0) pilha.splice(posicao, 1);
 }
 
+/** Há alguma gaveta ou diálogo aberto. */
+export function haCamadaAberta() {
+  return pilha.length > 0;
+}
+
 export function estaNoTopo(id: symbol) {
   return pilha[pilha.length - 1] === id;
 }

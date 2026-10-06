@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useIsPresent } from "motion/react";
 import { useId, useRef, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { tempoBaseMs } from "../estilo/tempo";
+import { molaBase, tempoBaseMs } from "../estilo/tempo";
 import { useCamadaModal } from "./useCamadaModal";
 import "./Gaveta.css";
 
@@ -62,8 +62,7 @@ export function Gaveta({ aberta, titulo, aoFechar, rodape, children }: Props) {
           initial={{ x: "100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
-          // Sem duração (movimento reduzido) não há mola: o painel troca de lugar na hora.
-          transition={duracao === 0 ? { duration: 0 } : { type: "spring", duration: duracao, bounce: 0.15 }}
+          transition={molaBase()}
         >
           <header className="gaveta__cabecalho">
             <h2 className="gaveta__titulo numero" id={idTitulo}>

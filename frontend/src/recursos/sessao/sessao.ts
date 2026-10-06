@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { requisitar } from "../../api/http";
+import { useEffect } from "react";
+import { aoExpirarSessao, requisitar } from "../../api/http";
 import type { Usuario } from "../../api/tipos";
 
 interface RespostaSessao {
@@ -14,6 +15,15 @@ export function useSessao() {
     queryFn: () => requisitar<RespostaSessao>("GET", "/api/sessao"),
     staleTime: Infinity,
   });
+}
+
+/**
+ * Sessão expirada: um 401 em qualquer requisição zera o usuário no cache. A rota protegida então leva
+ * para /entrar?depois=<endereço atual>; vários 401 juntos gravam o mesmo valor, sem novo redirecionamento.
+ */
+export function useSessaoExpirada() {
+  const cliente = useQueryClient();
+  useEffect(() => aoExpirarSessao(() => cliente.setQueryData<RespostaSessao>(chaveSessao, { usuario: null })), [cliente]);
 }
 
 export function useEntrar() {

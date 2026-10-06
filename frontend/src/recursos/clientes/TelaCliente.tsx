@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ErroApi } from "../../api/http";
 import type { TipoNota } from "../../api/tipos";
+import { useAtalho } from "../../atalhos/atalhos";
 import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Dialogo } from "../../componentes/Dialogo";
 import { Dinheiro } from "../../componentes/Dinheiro";
 import { EstadoVazio } from "../../componentes/EstadoVazio";
+import { FalhaDeConsulta } from "../../componentes/FalhaDeConsulta";
 import { Lista } from "../../componentes/Lista";
+import { haCamadaAberta } from "../../componentes/pilhaDeDialogos";
 import { Selo } from "../../componentes/Selo";
+import { useTitulo } from "../estrutura/titulo";
 import { useAbrirNota } from "../notas/abrirNota";
 import { useCliente, useCriarNota, useEditarCliente, useExcluirCliente } from "./clientes";
 import { FormularioCliente } from "./FormularioCliente";
@@ -40,18 +44,6 @@ export function TelaCliente() {
     [],
   );
 
-  if (cliente.error instanceof ErroApi && cliente.error.status === 404) {
-    return (
-      <section className="cliente">
-        <p>Cliente não encontrado.</p>
-        <Link to="/clientes">Voltar para a lista de clientes</Link>
-      </section>
-    );
-  }
-  if (cliente.isError) return <Aviso tipo="erro">Não foi possível carregar o cliente.</Aviso>;
-  if (!cliente.data) return null;
-  const c = cliente.data;
-
   const mensagem = (e: unknown) => (e instanceof Error ? e.message : "Não foi possível concluir a ação.");
 
   function novaNota(tipo: TipoNota) {
@@ -61,6 +53,30 @@ export function TelaCliente() {
       onError: (e) => setFalha(mensagem(e)),
     });
   }
+
+  useTitulo(cliente.data?.nome);
+  // N faz o mesmo que o botão "Nova nota única", com as mesmas travas; com gaveta ou diálogo aberto, nada.
+  useAtalho(
+    "n",
+    () => {
+      if (!haCamadaAberta() && !criarNota.isPending) novaNota("UNICA");
+    },
+    { ativo: cliente.data !== undefined },
+  );
+
+  if (cliente.error instanceof ErroApi && cliente.error.status === 404) {
+    return (
+      <section className="cliente">
+        <p>Cliente não encontrado.</p>
+        <Link to="/clientes">Voltar para a lista de clientes</Link>
+      </section>
+    );
+  }
+  if (cliente.isError) {
+    return <FalhaDeConsulta erro={cliente.error} mensagem="Não foi possível carregar o cliente." aoTentar={() => void cliente.refetch()} />;
+  }
+  if (!cliente.data) return null;
+  const c = cliente.data;
 
   const temRascunho = c.notas.some((n) => n.situacao === "RASCUNHO");
 

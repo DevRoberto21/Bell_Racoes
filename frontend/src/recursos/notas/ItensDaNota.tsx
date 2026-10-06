@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { formatarQuantidade } from "../../api/numero";
 import type { ItemNota } from "../../api/tipos";
 import { Dinheiro } from "../../componentes/Dinheiro";
-import { tempoBaseMs } from "../../estilo/tempo";
+import { molaBase } from "../../estilo/tempo";
 import "./ItensDaNota.css";
 
 interface Props {
@@ -17,7 +17,6 @@ interface Props {
 }
 
 export function ItensDaNota({ itens, aoRemover, bloqueado = false, children }: Props) {
-  const duracao = tempoBaseMs() / 1000;
   return (
     <section className="itens">
       <h3 className="itens__titulo">Itens</h3>
@@ -32,7 +31,7 @@ export function ItensDaNota({ itens, aoRemover, bloqueado = false, children }: P
                 className="itens__linha"
                 initial={{ opacity: 0, y: "50%" }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: duracao, ease: "easeOut" }}
+                transition={molaBase()}
               >
                 <span className="itens__descricao">{item.descricao}</span>
                 <span className="numero itens__conta">

@@ -1,0 +1,7 @@
+.pagas { display: flex; flex-direction: column; gap: var(--espaco-4); }
+.pagas__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.pagas__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
+.pagas__explicacao { color: var(--cor-texto-secundario); }
+.pagas__codigo { min-width: 6ch; font-weight: 650; }
+.pagas__cliente { flex: 1; min-width: 0; }
+.pagas__valor { min-width: 9ch; text-align: right; font-weight: 600; }

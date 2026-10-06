@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { simularMovimentoReduzido } from "../teste/movimento";
-import { duracaoEmMs, tempoBaseMs } from "./tempo";
+import { duracaoEmMs, molaBase, tempoBaseMs } from "./tempo";
 
 describe("duracaoEmMs", () => {
   it("lê segundos e milissegundos", () => {
@@ -40,5 +40,23 @@ describe("tempoBaseMs", () => {
       desfazer();
     }
     expect(tempoBaseMs()).toBe(400);
+  });
+});
+
+describe("molaBase", () => {
+  it("é uma mola leve com a duração de --tempo-base, em segundos", () => {
+    expect(molaBase()).toEqual({ type: "spring", duration: 0.4, bounce: 0.15 });
+    document.documentElement.style.setProperty("--tempo-base", "250ms");
+    expect(molaBase()).toEqual({ type: "spring", duration: 0.25, bounce: 0.15 });
+    document.documentElement.style.removeProperty("--tempo-base");
+  });
+
+  it("com movimento reduzido não há mola: a troca é imediata", () => {
+    const desfazer = simularMovimentoReduzido();
+    try {
+      expect(molaBase()).toEqual({ duration: 0 });
+    } finally {
+      desfazer();
+    }
   });
 });

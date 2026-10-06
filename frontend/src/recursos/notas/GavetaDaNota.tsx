@@ -5,12 +5,14 @@ import { Link, useSearchParams } from "react-router";
 import { formatarData } from "../../api/data";
 import { ErroApi } from "../../api/http";
 import type { ItemNota, Nota } from "../../api/tipos";
+import { useAtalho } from "../../atalhos/atalhos";
 import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Dialogo } from "../../componentes/Dialogo";
+import { FalhaDeConsulta } from "../../componentes/FalhaDeConsulta";
 import { Gaveta } from "../../componentes/Gaveta";
 import { Selo } from "../../componentes/Selo";
-import { tempoBaseMs } from "../../estilo/tempo";
+import { molaBase } from "../../estilo/tempo";
 import { useNotaAberta } from "./abrirNota";
 import { Correcao } from "./Correcao";
 import { abrirImpressao } from "./imprimir";
@@ -118,7 +120,17 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
     setModo("ver");
   };
   const naoEncontrada = consulta.error instanceof ErroApi && consulta.error.status === 404;
-  const duracao = tempoBaseMs() / 1000;
+  // R faz o mesmo que o botão Receber do rodapé, e só quando ele está na tela e destravado.
+  useAtalho("r", () => entrarEm("receber"), {
+    ativo:
+      aberta &&
+      modo === "ver" &&
+      !naoEncontrada &&
+      nota?.acoes.receber === true &&
+      !gravando &&
+      itemARemover === null &&
+      !confirmandoDescarte,
+  });
 
   function conteudo() {
     if (naoEncontrada) {
@@ -132,7 +144,9 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
       );
     }
     if (!nota) {
-      if (consulta.isError) return <Aviso tipo="erro">Não foi possível carregar a nota.</Aviso>;
+      if (consulta.isError) {
+        return <FalhaDeConsulta erro={consulta.error} mensagem="Não foi possível carregar a nota." aoTentar={() => void consulta.refetch()} />;
+      }
       return (
         <p className="nota__apoio" role="status">
           Carregando…
@@ -269,7 +283,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
             className="nota__falha"
             initial={{ opacity: 0, y: "-50%" }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: duracao, ease: "easeOut" }}
+            transition={molaBase()}
           >
             <Aviso tipo="erro">{falha}</Aviso>
           </motion.div>

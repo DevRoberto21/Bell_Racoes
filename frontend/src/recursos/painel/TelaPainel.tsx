@@ -2,9 +2,11 @@ import type { NotaResumo } from "../../api/tipos";
 import { Aviso } from "../../componentes/Aviso";
 import { Dinheiro } from "../../componentes/Dinheiro";
 import { EstadoVazio } from "../../componentes/EstadoVazio";
+import { FalhaDeConsulta } from "../../componentes/FalhaDeConsulta";
 import { Lista } from "../../componentes/Lista";
 import { rotuloDeAlerta } from "../../componentes/rotuloDeAlerta";
 import { Selo } from "../../componentes/Selo";
+import { useTitulo } from "../estrutura/titulo";
 import { useAbrirNota } from "../notas/abrirNota";
 import { usePainel } from "./painel";
 import "./TelaPainel.css";
@@ -29,13 +31,16 @@ function LinhaDeNota({ nota, abrir }: { nota: NotaResumo; abrir: (codigo: string
 }
 
 export function TelaPainel() {
+  useTitulo("Painel");
   const painel = usePainel();
   const abrirNota = useAbrirNota();
 
   return (
     <section className="painel">
       <h1 className="painel__titulo">Painel</h1>
-      {painel.isError && <Aviso tipo="erro">Não foi possível carregar o painel.</Aviso>}
+      {painel.isError && (
+        <FalhaDeConsulta erro={painel.error} mensagem="Não foi possível carregar o painel." aoTentar={() => void painel.refetch()} />
+      )}
       {painel.data && (
         <>
           {painel.data.backup_falhou && (

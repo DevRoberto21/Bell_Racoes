@@ -21,6 +21,8 @@
 .nota__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
 
 .nota__falha { margin-bottom: var(--espaco-4); }
+/* Quem desliza aqui é o invólucro (motion): o aviso de dentro não anima de novo. */
+.nota__falha .aviso { animation: none; }
 
 .nota__ausente {
   display: flex;

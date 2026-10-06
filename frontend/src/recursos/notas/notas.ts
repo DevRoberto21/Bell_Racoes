@@ -23,12 +23,18 @@ export function caminhoDaNota(codigo: string): string {
 
 const chaveDaNota = (codigo: string | null) => ["nota", codigo];
 
+const consultaDaNota = (codigo: string | null) => ({
+  queryKey: chaveDaNota(codigo),
+  queryFn: () => requisitar<Nota>("GET", caminhoDaNota(codigo as string)),
+});
+
 export function useNota(codigo: string | null) {
-  return useQuery({
-    queryKey: chaveDaNota(codigo),
-    queryFn: () => requisitar<Nota>("GET", caminhoDaNota(codigo as string)),
-    enabled: codigo !== null,
-  });
+  return useQuery({ ...consultaDaNota(codigo), enabled: codigo !== null });
+}
+
+/** Busca a nota completa agora, pelo mesmo cache da gaveta. */
+export function buscarNota(cliente: QueryClient, codigo: string): Promise<Nota> {
+  return cliente.fetchQuery(consultaDaNota(codigo));
 }
 
 function notaNoCache(cliente: QueryClient, codigo: string) {

@@ -7,6 +7,13 @@
   white-space: nowrap;
 }
 
+/* Ao quitar, o selo "Quitada" entra no lugar da situação. */
+.selo--quitada { animation: selo-entrada var(--tempo-base) var(--curva-mola) backwards; }
+
+@keyframes selo-entrada {
+  from { opacity: 0; transform: scale(0.8); }
+}
+
 .selo--alerta-1, .selo--rascunho { background: var(--cor-alerta-1-fundo); color: var(--cor-alerta-1-texto); }
 .selo--alerta-2 { background: var(--cor-alerta-2-fundo); color: var(--cor-alerta-2-texto); }
 .selo--alerta-3 { background: var(--cor-alerta-3-fundo); color: var(--cor-alerta-3-texto); }

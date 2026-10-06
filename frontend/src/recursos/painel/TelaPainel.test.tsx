@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { NotaResumo, Painel } from "../../api/tipos";
@@ -73,5 +73,22 @@ describe("TelaPainel", () => {
     renderizarComApp(<TelaPainel />);
     await userEvent.click(await screen.findByRole("button", { name: /12-03/ }));
     expect(screen.getByTestId("local")).toHaveTextContent("/?nota=12-03");
+  });
+
+  it("define o título da aba", async () => {
+    simular(painel());
+    renderizarComApp(<TelaPainel />);
+    await waitFor(() => expect(document.title).toBe("Painel · Bell Rações"));
+  });
+
+  it("falha de rede mostra o aviso com Tentar de novo, que busca outra vez", async () => {
+    const fetchSimulado = vi.fn().mockRejectedValueOnce(new TypeError("sem rede")).mockResolvedValue(responder(painel()));
+    vi.stubGlobal("fetch", fetchSimulado);
+    renderizarComApp(<TelaPainel />);
+    const aviso = await screen.findByRole("alert");
+    expect(aviso).toHaveTextContent("Sem conexão com o servidor.");
+    await userEvent.click(within(aviso).getByRole("button", { name: "Tentar de novo" }));
+    expect(await screen.findByText("R$ 4.812,50")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

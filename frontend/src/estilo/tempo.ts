@@ -1,3 +1,5 @@
+import type { Transition } from "motion/react";
+
 const PADRAO_MS = 400;
 
 /** "0.4s" vira 400, "250ms" vira 250; texto vazio ou inválido vira null. */
@@ -20,4 +22,13 @@ export function tempoBaseMs(): number {
   if (movimentoReduzido()) return 0;
   const valor = getComputedStyle(document.documentElement).getPropertyValue("--tempo-base");
   return duracaoEmMs(valor) ?? PADRAO_MS;
+}
+
+/**
+ * Transição do movimento base nas animações do motion: mola leve com a duração de --tempo-base.
+ * Sem duração (movimento reduzido) não há mola: o elemento troca de lugar na hora.
+ */
+export function molaBase(): Transition {
+  const duracao = tempoBaseMs() / 1000;
+  return duracao === 0 ? { duration: 0 } : { type: "spring", duration: duracao, bounce: 0.15 };
 }

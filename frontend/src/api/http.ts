@@ -12,6 +12,18 @@ export class ErroApi extends Error {
   }
 }
 
+/** Nestes dois caminhos o 401 é a resposta normal de quem não entrou, não uma sessão que expirou. */
+const SEM_SESSAO_ESPERADA = new Set(["/api/sessao", "/api/entrar"]);
+const ouvintesDaSessao = new Set<() => void>();
+
+/** Registra quem deve saber que o servidor respondeu 401 (sessão expirada); devolve a função que cancela. */
+export function aoExpirarSessao(ouvinte: () => void): () => void {
+  ouvintesDaSessao.add(ouvinte);
+  return () => {
+    ouvintesDaSessao.delete(ouvinte);
+  };
+}
+
 function tokenCsrf(): string {
   const par = document.cookie.split("; ").find((c) => c.startsWith("csrftoken="));
   return par ? decodeURIComponent(par.slice("csrftoken=".length)) : "";
@@ -33,6 +45,10 @@ export async function requisitar<T>(metodo: Metodo, caminho: string, corpo?: unk
     resposta = await fetch(caminho, opcoes);
   } catch {
     throw new ErroApi("Sem conexão com o servidor.", 0);
+  }
+
+  if (resposta.status === 401 && !SEM_SESSAO_ESPERADA.has(caminho)) {
+    for (const ouvinte of ouvintesDaSessao) ouvinte();
   }
 
   let dados: unknown;

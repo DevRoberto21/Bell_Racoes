@@ -218,4 +218,11 @@ describe("TelaCliente", () => {
     expect(await screen.findByText("Cliente não encontrado.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voltar para a lista de clientes" })).toHaveAttribute("href", "/clientes");
   });
+
+  it("define o título da aba com o nome do cliente", async () => {
+    simular(cliente());
+    tela();
+    await screen.findByRole("heading", { name: /José Pereira/ });
+    expect(document.title).toBe("José Pereira · Bell Rações");
+  });
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ErroApi, requisitar } from "./http";
+import { aoExpirarSessao, ErroApi, requisitar } from "./http";
 
 function resposta(status: number, corpo?: unknown) {
   return {
@@ -81,5 +81,41 @@ describe("requisitar", () => {
     expect(falha).toBeInstanceOf(ErroApi);
     expect(falha.status).toBe(0);
     expect(falha.message).toBe("Sem conexão com o servidor.");
+  });
+
+  it("avisa quem ouve a sessão quando a resposta é 401, com ou sem JSON", async () => {
+    const ouvinte = vi.fn();
+    const cancelar = aoExpirarSessao(ouvinte);
+    simular(resposta(401, { erro: "Entre para continuar." }));
+    const falha = await rejeicao(requisitar("GET", "/api/painel"));
+    expect(falha.status).toBe(401);
+    expect(ouvinte).toHaveBeenCalledTimes(1);
+
+    simular(resposta(401));
+    await rejeicao(requisitar("POST", "/api/notas/1-1/fechar", {}));
+    expect(ouvinte).toHaveBeenCalledTimes(2);
+
+    cancelar();
+    await rejeicao(requisitar("GET", "/api/painel"));
+    expect(ouvinte).toHaveBeenCalledTimes(2);
+  });
+
+  it("401 de /api/sessao e de /api/entrar não conta como sessão expirada", async () => {
+    const ouvinte = vi.fn();
+    const cancelar = aoExpirarSessao(ouvinte);
+    simular(resposta(401, { erro: "Usuário ou senha incorretos." }));
+    await rejeicao(requisitar("POST", "/api/entrar", {}));
+    await rejeicao(requisitar("GET", "/api/sessao"));
+    expect(ouvinte).not.toHaveBeenCalled();
+    cancelar();
+  });
+
+  it("outros erros não avisam a sessão", async () => {
+    const ouvinte = vi.fn();
+    const cancelar = aoExpirarSessao(ouvinte);
+    simular(resposta(409, { erro: "Mudou." }));
+    await rejeicao(requisitar("POST", "/api/x", {}));
+    expect(ouvinte).not.toHaveBeenCalled();
+    cancelar();
   });
 });

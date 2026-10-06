@@ -7,7 +7,7 @@ import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Campo } from "../../componentes/Campo";
 import { CampoForma } from "../../componentes/CampoForma";
-import { tempoBaseMs } from "../../estilo/tempo";
+import { molaBase } from "../../estilo/tempo";
 import { mensagemDeErro, type DadosPagamento } from "./notas";
 import "./Receber.css";
 
@@ -29,7 +29,6 @@ export function Receber({ saldo, aoConfirmar, aoCancelar }: Props) {
   const [erroDoValor, setErroDoValor] = useState<string>();
   const [falha, setFalha] = useState<string>();
   const [enviando, setEnviando] = useState(false);
-  const duracao = tempoBaseMs() / 1000;
 
   useEffect(() => {
     const campo = formulario.current?.elements.namedItem("valor");
@@ -66,7 +65,7 @@ export function Receber({ saldo, aoConfirmar, aoCancelar }: Props) {
       onSubmit={enviar}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: duracao, ease: "easeOut" }}
+      transition={molaBase()}
     >
       {falha && <Aviso tipo="erro">{falha}</Aviso>}
       <div className="receber__campos">
