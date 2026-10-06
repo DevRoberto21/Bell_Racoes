@@ -1,0 +1,5 @@
+.estrutura { display: flex; min-height: 100vh; }
+
+.estrutura__area { flex: 1; min-width: 0; padding: var(--espaco-5) var(--espaco-6); }
+
+.estrutura__topo { margin-bottom: var(--espaco-5); }

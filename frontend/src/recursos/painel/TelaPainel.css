@@ -1,0 +1,27 @@
+.painel { display: flex; flex-direction: column; gap: var(--espaco-4); }
+
+.painel__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+
+.painel__cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+.painel__rotulo { color: var(--cor-texto-secundario); font-size: var(--texto-pequeno); }
+.painel__total { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+
+.painel__secao {
+  margin-top: var(--espaco-2);
+  font-size: var(--texto-corpo);
+  font-weight: 650;
+  color: var(--cor-texto-secundario);
+}
+
+.painel__codigo { font-weight: 650; }
+.painel__cliente { flex: 1; min-width: 0; }
+.painel__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
+.painel__valor { min-width: 9ch; text-align: right; font-weight: 600; }

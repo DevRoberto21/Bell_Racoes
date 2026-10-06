@@ -1,0 +1,14 @@
+.selo {
+  display: inline-block;
+  padding: 2px var(--espaco-2);
+  border-radius: var(--raio-controle);
+  font-size: var(--texto-pequeno);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.selo--alerta-1, .selo--rascunho { background: var(--cor-alerta-1-fundo); color: var(--cor-alerta-1-texto); }
+.selo--alerta-2 { background: var(--cor-alerta-2-fundo); color: var(--cor-alerta-2-texto); }
+.selo--alerta-3 { background: var(--cor-alerta-3-fundo); color: var(--cor-alerta-3-texto); }
+.selo--quitada { background: var(--cor-quitada-fundo); color: var(--cor-quitada-texto); }
+.selo--editado { background: var(--cor-acao-suave); color: var(--cor-acao-suave-texto); }
