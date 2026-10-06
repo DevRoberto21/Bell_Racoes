@@ -83,10 +83,10 @@ USE_THOUSAND_SEPARATOR = False
 
 STATIC_URL = "static/"
 WHITENOISE_USE_FINDERS = True
+FRONT_DIST = BASE_DIR / "frontend" / "dist"
+STATICFILES_DIRS = [("app", FRONT_DIST)] if FRONT_DIST.exists() else []
 
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "painel"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_URL = "/entrar"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 

@@ -7,9 +7,15 @@ import { useTitulo } from "../estrutura/titulo";
 import { useEntrar } from "./sessao";
 import "./TelaEntrar.css";
 
-function destinoSeguro(depois: string | null): string {
-  // Só caminhos internos: evita redirecionar para outro site.
-  return depois && depois.startsWith("/") && !depois.startsWith("//") ? depois : "/";
+function destinoSeguro(destino: string | null): string {
+  // Só caminhos internos: "//site" e "/\site" levam o navegador para outro site.
+  if (!destino || !destino.startsWith("/")) return "/";
+  return destino[1] === "/" || destino[1] === "\\" ? "/" : destino;
+}
+
+// As páginas de impressão são do Django: o roteador do front não as conhece.
+function eDoServidor(destino: string): boolean {
+  return destino.startsWith("/notas/") || destino.startsWith("/recibos/");
 }
 
 export function TelaEntrar() {
@@ -24,7 +30,14 @@ export function TelaEntrar() {
     evento.preventDefault();
     entrar.mutate(
       { usuario, senha },
-      { onSuccess: () => navegar(destinoSeguro(parametros.get("depois")), { replace: true }) },
+      {
+        onSuccess: () => {
+          // "depois" vem do front; "next" vem do redirecionamento do Django.
+          const destino = destinoSeguro(parametros.get("depois") ?? parametros.get("next"));
+          if (eDoServidor(destino)) window.location.assign(destino);
+          else navegar(destino, { replace: true });
+        },
+      },
     );
   }
 

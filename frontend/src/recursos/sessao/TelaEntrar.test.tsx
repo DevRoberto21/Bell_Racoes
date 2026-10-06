@@ -28,6 +28,19 @@ function responder(status: number, corpo: unknown) {
   return { ok: status < 300, status, json: async () => corpo };
 }
 
+function simularEntradaAceita() {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(responder(200, { usuario: { nome_de_usuario: "caixa1", nome: "Flávia" } })),
+  );
+}
+
+async function entrar() {
+  await userEvent.type(screen.getByLabelText("Usuário"), "caixa1");
+  await userEvent.type(screen.getByLabelText("Senha"), "x");
+  await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -67,6 +80,51 @@ describe("TelaEntrar", () => {
     await userEvent.type(screen.getByLabelText("Senha"), "x");
     await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
     expect(await screen.findByText("Chegou em /clientes/3")).toBeInTheDocument();
+  });
+
+  it("aceita o destino em ?next=, que é como o servidor redireciona", async () => {
+    simularEntradaAceita();
+    montar("/entrar?next=/clientes/3");
+    await entrar();
+    expect(await screen.findByText("Chegou em /clientes/3")).toBeInTheDocument();
+  });
+
+  it.each(["/notas/1-1/imprimir/", "/recibos/7/", "/recibos/lote/00000000-0000-0000-0000-000000000001/"])(
+    "destino do servidor (%s) carrega a página inteira em vez de navegar no roteador",
+    async (destino) => {
+      const atribuir = vi.fn();
+      vi.stubGlobal("location", { ...window.location, assign: atribuir });
+      simularEntradaAceita();
+      montar(`/entrar?next=${encodeURIComponent(destino)}`);
+      await entrar();
+      await waitFor(() => expect(atribuir).toHaveBeenCalledWith(destino));
+      expect(screen.queryByText(/Chegou em/)).not.toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ["outro site com duas barras", "//evil.com"],
+    ["outro site com barra invertida", "/\\evil.com"],
+    ["endereço completo", "https://evil.com"],
+    ["caminho sem barra inicial", "clientes"],
+  ])("recusa %s e vai para a raiz", async (_caso, destino) => {
+    const atribuir = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign: atribuir });
+    simularEntradaAceita();
+    montar(`/entrar?next=${encodeURIComponent(destino)}`);
+    await entrar();
+    expect(await screen.findByText("Chegou em /")).toBeInTheDocument();
+    expect(atribuir).not.toHaveBeenCalled();
+  });
+
+  it("recusa destino do servidor disfarçado com barra invertida", async () => {
+    const atribuir = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign: atribuir });
+    simularEntradaAceita();
+    montar(`/entrar?depois=${encodeURIComponent("/\\notas/evil.com")}`);
+    await entrar();
+    expect(await screen.findByText("Chegou em /")).toBeInTheDocument();
+    expect(atribuir).not.toHaveBeenCalled();
   });
 
   it("mostra o erro da API e mantém o usuário digitado", async () => {

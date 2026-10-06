@@ -95,7 +95,7 @@ class Nota(models.Model):
         return self.codigo
 
     def get_absolute_url(self):
-        return reverse("nota", args=[self.cliente.codigo, self.numero])
+        return f"/clientes/{self.cliente.codigo}?nota={self.codigo}"
 
     @property
     def codigo(self):

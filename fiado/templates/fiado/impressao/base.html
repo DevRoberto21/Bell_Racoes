@@ -22,7 +22,7 @@
 </head>
 <body>
   <p class="nao-imprimir">
-    <a href="{{ voltar }}">Voltar</a>
+    <button type="button" onclick="window.close()">Fechar</button>
     <button type="button" onclick="window.print()">Imprimir de novo</button>
   </p>
   {% block conteudo %}{% endblock %}

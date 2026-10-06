@@ -4,8 +4,17 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 
 ## Caixa 1 (servidor)
 
+**Antes de copiar, na máquina de desenvolvimento (precisa de Node 20 ou mais novo):**
+
+```bash
+npm --prefix frontend ci
+npm --prefix frontend run build
+```
+
+Isso gera a pasta `frontend/dist`, que precisa ir junto. A loja não precisa de Node.
+
 1. Instale o `uv`: https://docs.astral.sh/uv/getting-started/installation/
-2. Copie a pasta do projeto para `C:\BellRacoes`. Copie tudo, menos as pastas `.venv` e `dados`. A pasta `dados` guarda o banco da loja: nunca copie outra por cima dela, nem ao atualizar o sistema.
+2. Copie a pasta do projeto para `C:\BellRacoes`. Copie tudo, menos as pastas `.venv`, `dados` e `frontend/node_modules`. A pasta `dados` guarda o banco da loja: nunca copie outra por cima dela, nem ao atualizar o sistema.
 3. Abra o Prompt de Comando nessa pasta e rode:
 
    ```bat
@@ -31,6 +40,7 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 
   No caixa 2, troque `localhost` pelo IP do caixa 1.
 - No Windows, deixe a impressora térmica de 80 mm como impressora padrão de cada caixa.
+- As notas e os recibos abrem em nova aba para imprimir; libere pop-ups para o endereço do sistema quando o Chrome perguntar.
 
 ## Dados da loja no impresso
 
@@ -76,3 +86,4 @@ O sistema não tem proteção para rede aberta. Use só na rede interna da loja.
 - [ ] Conferir se o nome da loja, com acentos, aparece certo numa nota impressa.
 - [ ] Imprimir uma nota e um recibo na impressora térmica.
 - [ ] Abrir o sistema a partir do caixa 2.
+- [ ] Abrir uma nota, receber um pagamento e conferir que o recibo abre em nova aba.

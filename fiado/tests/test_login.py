@@ -4,27 +4,6 @@ from django.core.management import call_command
 pytestmark = pytest.mark.django_db
 
 
-def test_painel_exige_login(client):
-    resposta = client.get("/")
-    assert resposta.status_code == 302
-    assert resposta["Location"].startswith("/entrar/")
-
-
-def test_login_leva_ao_painel(client, usuario):
-    resposta = client.post(
-        "/entrar/", {"username": "caixa1", "password": "senha-forte-1"}, follow=True
-    )
-    assert resposta.status_code == 200
-    assert resposta.request["PATH_INFO"] == "/"
-    assert "caixa1" in resposta.content.decode()
-
-
-def test_login_com_senha_errada_nao_entra(client, usuario):
-    resposta = client.post("/entrar/", {"username": "caixa1", "password": "errada"})
-    assert resposta.status_code == 200
-    assert "_auth_user_id" not in client.session
-
-
 def test_criar_caixas_cria_os_dois_usuarios(django_user_model):
     call_command("criar_caixas", senha1="senha-forte-1", senha2="senha-forte-2")
     caixa1 = django_user_model.objects.get(username="caixa1")
@@ -42,7 +21,7 @@ def test_criar_caixas_duas_vezes_troca_a_senha(django_user_model):
     assert django_user_model.objects.get(username="caixa1").check_password("outra-senha-1")
 
 
-def test_todas_as_rotas_exigem_login(client):
+def test_todas_as_rotas_do_servidor_exigem_login(client):
     from uuid import UUID
 
     from django.urls import reverse
@@ -50,7 +29,9 @@ def test_todas_as_rotas_exigem_login(client):
     from fiado.urls import urlpatterns
 
     argumentos = {"uuid": UUID("00000000-0000-0000-0000-000000000001")}
-    for padrao in urlpatterns:
+    protegidas = [padrao for padrao in urlpatterns if padrao.name != "spa"]
+    assert [padrao.name for padrao in protegidas] == ["imprimir_nota", "recibo", "recibo_lote"]
+    for padrao in protegidas:
         kwargs = {
             nome: argumentos.get(conversor.__class__.__name__.replace("Converter", "").lower(), 1)
             for nome, conversor in padrao.pattern.converters.items()
@@ -58,7 +39,7 @@ def test_todas_as_rotas_exigem_login(client):
         caminho = reverse(padrao.name, kwargs=kwargs)
         resposta = client.get(caminho)
         assert resposta.status_code == 302, caminho
-        assert resposta["Location"].startswith("/entrar/"), caminho
+        assert resposta["Location"] == f"/entrar?next={caminho}", caminho
 
 
 def test_criar_caixas_recusa_senha_em_branco(django_user_model):
