@@ -1,0 +1,11 @@
+.novo-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 11ch 12ch auto;
+  align-items: start;
+  gap: var(--espaco-2);
+}
+
+.novo-item .campo__entrada { width: 100%; min-width: 0; }
+
+/* Desce o botão a altura do rótulo dos campos, para ficar na linha das entradas. */
+.novo-item__enviar { margin-top: calc(var(--texto-pequeno) * 1.45 + var(--espaco-1)); }

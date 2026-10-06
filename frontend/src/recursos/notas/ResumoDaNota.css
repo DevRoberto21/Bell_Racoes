@@ -1,0 +1,53 @@
+.resumo { display: flex; flex-direction: column; gap: var(--espaco-3); }
+
+.resumo__titulo { font-size: var(--texto-corpo); font-weight: 650; color: var(--cor-texto-secundario); }
+
+.resumo__pagamentos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.resumo__pagamento {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaco-3);
+  padding: var(--espaco-2) 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.resumo__apoio { flex: 1; min-width: 0; color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
+
+.resumo__valor { min-width: 10ch; text-align: right; font-weight: 600; white-space: nowrap; }
+
+.resumo__recibo { color: var(--cor-acao); font-size: var(--texto-pequeno); font-weight: 600; }
+.resumo__recibo:hover { color: var(--cor-acao-forte); }
+
+.resumo__totais {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin: 0;
+  padding: var(--espaco-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-fundo);
+}
+
+.resumo__linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+}
+.resumo__linha dd { margin: 0; }
+
+.resumo__linha--saldo {
+  margin-top: var(--espaco-2);
+  padding-top: var(--espaco-2);
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  font-size: var(--texto-titulo);
+  font-weight: var(--peso-titulo);
+}

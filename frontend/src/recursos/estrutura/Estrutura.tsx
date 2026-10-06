@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { Busca } from "../busca/Busca";
+import { GavetaDaNota } from "../notas/GavetaDaNota";
 import { Menu } from "./Menu";
 import "./Estrutura.css";
 
@@ -15,6 +16,7 @@ export function Estrutura() {
           <Outlet />
         </main>
       </div>
+      <GavetaDaNota />
     </div>
   );
 }

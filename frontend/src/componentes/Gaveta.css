@@ -5,6 +5,7 @@
   z-index: 40;
   background: var(--cor-veu);
 }
+.gaveta__veu--saindo { pointer-events: none; }
 
 .gaveta {
   position: fixed;
@@ -58,6 +59,7 @@
 
 .gaveta__rodape {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--espaco-2);
   padding: var(--espaco-4) var(--espaco-5);

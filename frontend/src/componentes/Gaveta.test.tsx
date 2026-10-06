@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MotionGlobalConfig } from "motion/react";
 import { useState } from "react";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Dialogo } from "./Dialogo";
 import { Gaveta } from "./Gaveta";
 
@@ -47,14 +47,6 @@ async function abrir() {
 
 const gaveta = () => screen.queryByRole("dialog", { name: "Nota 01-03" });
 const sumiu = () => waitFor(() => expect(gaveta()).not.toBeInTheDocument());
-
-// As animações terminam na hora: os testes não dependem do tempo de saída da gaveta.
-beforeAll(() => {
-  MotionGlobalConfig.skipAnimations = true;
-});
-afterAll(() => {
-  MotionGlobalConfig.skipAnimations = false;
-});
 
 describe("Gaveta", () => {
   it("fechada não renderiza nada", () => {
@@ -127,5 +119,22 @@ describe("Gaveta", () => {
     await usuario.click(screen.getByRole("button", { name: "Descartar" }));
     await usuario.click(screen.getByTestId("veu-gaveta"));
     expect(gaveta()).toBeInTheDocument();
+  });
+
+  it("durante a saída o véu continua na tela, mas não recebe mais cliques", async () => {
+    const { usuario } = await abrir();
+    expect(screen.getByTestId("veu-gaveta")).not.toHaveClass("gaveta__veu--saindo");
+    // Só a saída roda de verdade: é esse intervalo que está em teste. Antes, espera a entrada assentar;
+    // uma saída pedida com o véu ainda transparente não tem o que animar e termina na hora.
+    await waitFor(() => expect(screen.getByTestId("veu-gaveta")).toHaveStyle({ opacity: "1" }));
+    MotionGlobalConfig.skipAnimations = false;
+    try {
+      await usuario.keyboard("{Escape}");
+      expect(screen.getByTestId("veu-gaveta")).toHaveClass("gaveta__veu--saindo");
+      // A saída de verdade leva --tempo-base; com a suíte toda em paralelo o jsdom atrasa os quadros, daí a folga.
+      await waitFor(() => expect(gaveta()).not.toBeInTheDocument(), { timeout: 4000 });
+    } finally {
+      MotionGlobalConfig.skipAnimations = true;
+    }
   });
 });
