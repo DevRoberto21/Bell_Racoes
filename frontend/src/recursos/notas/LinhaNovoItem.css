@@ -9,3 +9,31 @@
 
 /* Desce o botão a altura do rótulo dos campos, para ficar na linha das entradas. */
 .novo-item__enviar { margin-top: calc(var(--texto-pequeno) * 1.45 + var(--espaco-1)); }
+
+.novo-item__descricao { position: relative; min-width: 0; }
+
+.novo-item__sugestoes {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + var(--espaco-1));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: var(--espaco-2);
+  list-style: none;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  animation: novo-item-sugestoes var(--tempo-micro) ease-out;
+}
+@keyframes novo-item-sugestoes { from { opacity: 0; transform: translateY(-4px); } }
+
+.novo-item__sugestao {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-radius: var(--raio-controle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.novo-item__sugestao--ativa { background: var(--cor-acao-suave); color: var(--cor-acao-suave-texto); }

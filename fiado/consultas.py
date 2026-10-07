@@ -4,12 +4,13 @@ from decimal import Decimal
 from django.db.models import Count, Sum
 from django.utils import timezone
 
-from fiado.models import CENTAVO, ItemNota, Nota, Pagamento
+from fiado.models import CENTAVO, ItemNota, Nota, Pagamento, normalizar
 
 S = Nota.Situacao
 EM_DIVIDA = [S.ABERTA, S.FECHADA]
 PRAZO_DIAS = 7
 ZERO = Decimal("0.00")
+MINIMO_SUGESTAO = 2
 
 
 def divida_do_cliente(cliente):
@@ -75,3 +76,20 @@ def rascunhos():
     return Nota.objects.filter(situacao=S.RASCUNHO).select_related("cliente").order_by(
         "criada_em", "numero"
     )
+
+
+def descricoes_sugeridas(termo, limite):
+    """Descrições já lançadas em que alguma palavra começa com o termo, as mais usadas primeiro.
+
+    Grafias que só diferem em acento ou maiúscula contam juntas e aparecem na forma mais usada.
+    """
+    termo = normalizar(termo or "")
+    if len(termo) < MINIMO_SUGESTAO:
+        return []
+    grupos = {}
+    for descricao, usos in ItemNota.objects.order_by().values_list("descricao").annotate(usos=Count("id")):
+        chave = normalizar(descricao)
+        if chave.startswith(termo) or f" {termo}" in chave:
+            grupos.setdefault(chave, []).append((usos, descricao))
+    ordenados = sorted(grupos.items(), key=lambda par: (-sum(usos for usos, _ in par[1]), par[0]))
+    return [max(grafias, key=lambda g: (g[0], g[1]))[1] for _, grafias in ordenados[:limite]]

@@ -9,6 +9,7 @@ urlpatterns = [
     path("painel", leitura.painel),
     path("busca", leitura.busca),
     path("pagas", leitura.pagas),
+    path("itens/sugestoes", leitura.sugestoes_de_item),
     path("clientes", clientes.lista),
     path("clientes/<int:codigo>", clientes.detalhe),
     path("clientes/<int:codigo>/divida/previa", clientes.previa_divida),

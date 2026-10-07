@@ -12,6 +12,7 @@ from fiado.backup import copia_de_hoje_existe
 from fiado.busca import buscar, filtrar_clientes
 
 LIMITE_BUSCA = 8
+LIMITE_SUGESTOES = 8
 
 
 @api("GET")
@@ -42,3 +43,8 @@ def busca(request):
 @api("GET")
 def pagas(request):
     return [nota_resumo(n) for n in consultas.notas_pagas_recentes()]
+
+
+@api("GET")
+def sugestoes_de_item(request):
+    return {"sugestoes": consultas.descricoes_sugeridas(request.GET.get("q", ""), LIMITE_SUGESTOES)}

@@ -1,12 +1,17 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderizarComApp, responder } from "../../teste/renderizar";
 import { LinhaNovoItem } from "./LinhaNovoItem";
 
-function montar(aoAdicionar = vi.fn(async () => {})) {
-  render(<LinhaNovoItem aoAdicionar={aoAdicionar} />);
-  return { usuario: userEvent.setup(), aoAdicionar };
+function montar(aoAdicionar = vi.fn(async () => {}), sugestoes: string[] = []) {
+  const consultas = vi.fn(async (_url: string) => responder({ sugestoes }));
+  vi.stubGlobal("fetch", consultas);
+  renderizarComApp(<LinhaNovoItem aoAdicionar={aoAdicionar} />);
+  return { usuario: userEvent.setup(), aoAdicionar, consultas };
 }
+
+afterEach(() => vi.unstubAllGlobals());
 
 const descricao = () => screen.getByLabelText("Descrição");
 const quantidade = () => screen.getByLabelText("Quantidade");
@@ -107,5 +112,105 @@ describe("LinhaNovoItem", () => {
     await usuario.clear(preco());
     await usuario.type(preco(), "5");
     expect(preco()).not.toHaveAttribute("aria-invalid");
+  });
+
+  describe("sugestões de descrição", () => {
+    const RACOES = ["Ração cães 15kg", "Ração gatos"];
+    const opcoes = () => screen.getAllByRole("option").map((o) => o.textContent);
+
+    async function digitarComSugestoes(aoAdicionar = vi.fn(async () => {})) {
+      const montado = montar(aoAdicionar, RACOES);
+      await montado.usuario.type(preco(), "10");
+      await montado.usuario.type(descricao(), "ra");
+      await screen.findByRole("listbox");
+      return montado;
+    }
+
+    it("duas letras consultam e mostram as descrições já usadas", async () => {
+      const { consultas } = await digitarComSugestoes();
+      expect(consultas).toHaveBeenCalledWith("/api/itens/sugestoes?q=ra", expect.anything());
+      expect(opcoes()).toEqual(RACOES);
+      expect(descricao()).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it("uma letra só não consulta", async () => {
+      const { usuario, consultas } = montar(undefined, RACOES);
+      await usuario.type(descricao(), "r");
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      expect(consultas).not.toHaveBeenCalled();
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+
+    it("seta para baixo e Enter aceitam a sugestão, sem enviar, e levam à quantidade", async () => {
+      const { usuario, aoAdicionar } = await digitarComSugestoes();
+      await usuario.keyboard("{ArrowDown}{ArrowDown}");
+      expect(screen.getByRole("option", { name: "Ração gatos" })).toHaveAttribute("aria-selected", "true");
+      await usuario.keyboard("{Enter}");
+      expect(descricao()).toHaveValue("Ração gatos");
+      expect(aoAdicionar).not.toHaveBeenCalled();
+      expect(quantidade()).toHaveFocus();
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+
+    it("Tab aceita a sugestão destacada e segue para a quantidade", async () => {
+      const { usuario } = await digitarComSugestoes();
+      await usuario.keyboard("{ArrowDown}{Tab}");
+      expect(descricao()).toHaveValue("Ração cães 15kg");
+      expect(quantidade()).toHaveFocus();
+    });
+
+    it("Enter sem sugestão destacada envia o que foi digitado", async () => {
+      const { usuario, aoAdicionar } = await digitarComSugestoes();
+      await usuario.keyboard("{Enter}");
+      expect(aoAdicionar).toHaveBeenCalledWith({ descricao: "ra", quantidade: "1.000", preco_unitario: "10.00" });
+    });
+
+    it("seta para cima a partir da primeira volta ao texto digitado", async () => {
+      const { usuario, aoAdicionar } = await digitarComSugestoes();
+      await usuario.keyboard("{ArrowDown}{ArrowUp}{Enter}");
+      expect(aoAdicionar).toHaveBeenCalledWith({ descricao: "ra", quantidade: "1.000", preco_unitario: "10.00" });
+    });
+
+    it("Esc fecha a lista e não chega a quem está por fora", async () => {
+      const porFora = vi.fn();
+      document.addEventListener("keydown", porFora);
+      const { usuario } = await digitarComSugestoes();
+      porFora.mockClear();
+      await usuario.keyboard("{Escape}");
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      expect(porFora).not.toHaveBeenCalled();
+      expect(descricao()).toHaveValue("ra");
+      await usuario.keyboard("{Escape}");
+      expect(porFora).toHaveBeenCalledTimes(1);
+      document.removeEventListener("keydown", porFora);
+    });
+
+    it("clicar numa sugestão aceita e leva à quantidade", async () => {
+      const { usuario, aoAdicionar } = await digitarComSugestoes();
+      await usuario.click(screen.getByRole("option", { name: "Ração gatos" }));
+      expect(descricao()).toHaveValue("Ração gatos");
+      expect(quantidade()).toHaveFocus();
+      expect(aoAdicionar).not.toHaveBeenCalled();
+    });
+
+    it("não sugere o que já está escrito igual", async () => {
+      const { usuario } = montar(undefined, ["Milho", "Milho moído"]);
+      await usuario.type(descricao(), "Milho");
+      await screen.findByRole("listbox");
+      expect(opcoes()).toEqual(["Milho moído"]);
+    });
+
+    it("se a consulta falhar o campo continua funcionando sem lista", async () => {
+      const aoAdicionar = vi.fn(async () => {});
+      vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("fora do ar"))));
+      renderizarComApp(<LinhaNovoItem aoAdicionar={aoAdicionar} />);
+      const usuario = userEvent.setup();
+      await usuario.type(preco(), "10");
+      await usuario.type(descricao(), "Milho");
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      await usuario.keyboard("{Enter}");
+      expect(aoAdicionar).toHaveBeenCalledWith({ descricao: "Milho", quantidade: "1.000", preco_unitario: "10.00" });
+    });
   });
 });

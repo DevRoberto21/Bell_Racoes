@@ -1,8 +1,9 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { paraDecimal } from "../../api/numero";
 import { Botao } from "../../componentes/Botao";
 import { Campo } from "../../componentes/Campo";
 import type { DadosItem } from "./notas";
+import { useSugestoesDeItem } from "./useSugestoesDeItem";
 import "./LinhaNovoItem.css";
 
 interface Props {
@@ -21,10 +22,44 @@ export function LinhaNovoItem({ aoAdicionar, bloqueado = false }: Props) {
   const [preco, setPreco] = useState("");
   const [invalido, setInvalido] = useState({ quantidade: false, preco: false });
   const [enviando, setEnviando] = useState(false);
+  const [listaAberta, setListaAberta] = useState(false);
+  // -1: nenhuma sugestão destacada, e o Enter envia o que foi digitado.
+  const [indice, setIndice] = useState(-1);
+  const idLista = useId();
+  const sugestoes = useSugestoesDeItem(descricao).filter((sugestao) => sugestao !== descricao.trim());
+  const listaVisivel = listaAberta && sugestoes.length > 0;
+  const ativo = Math.min(indice, sugestoes.length - 1);
 
-  function focarDescricao() {
-    const campo = formulario.current?.elements.namedItem("descricao");
+  function focar(nome: string) {
+    const campo = formulario.current?.elements.namedItem(nome);
     if (campo instanceof HTMLInputElement) campo.focus();
+  }
+  const focarDescricao = () => focar("descricao");
+
+  function aceitar(sugestao: string) {
+    setDescricao(sugestao);
+    setListaAberta(false);
+    setIndice(-1);
+  }
+
+  function aoTeclarNaDescricao(evento: KeyboardEvent<HTMLInputElement>) {
+    if (!listaVisivel) return;
+    if (evento.key === "Escape") {
+      evento.preventDefault();
+      evento.stopPropagation(); // fecha só a lista, não a gaveta em volta
+      setListaAberta(false);
+      setIndice(-1);
+    } else if (evento.key === "ArrowDown" || evento.key === "ArrowUp") {
+      evento.preventDefault();
+      const passo = evento.key === "ArrowDown" ? 1 : -1;
+      setIndice(Math.max(-1, Math.min(ativo + passo, sugestoes.length - 1)));
+    } else if (evento.key === "Enter" && ativo >= 0) {
+      evento.preventDefault();
+      aceitar(sugestoes[ativo]);
+      focar("quantidade");
+    } else if (evento.key === "Tab" && !evento.shiftKey && ativo >= 0) {
+      aceitar(sugestoes[ativo]); // o próprio Tab leva o foco à quantidade
+    }
   }
 
   async function enviar(evento: FormEvent) {
@@ -55,14 +90,47 @@ export function LinhaNovoItem({ aoAdicionar, bloqueado = false }: Props) {
 
   return (
     <form ref={formulario} className="novo-item" onSubmit={enviar} noValidate>
-      <Campo
-        className="novo-item__descricao"
-        rotulo="Descrição"
-        name="descricao"
-        autoComplete="off"
-        value={descricao}
-        onChange={(e) => setDescricao(e.target.value)}
-      />
+      <div className="novo-item__descricao">
+        <Campo
+          rotulo="Descrição"
+          name="descricao"
+          role="combobox"
+          aria-expanded={listaVisivel}
+          aria-controls={idLista}
+          aria-activedescendant={listaVisivel && ativo >= 0 ? `${idLista}-${ativo}` : undefined}
+          aria-autocomplete="list"
+          autoComplete="off"
+          value={descricao}
+          onChange={(e) => {
+            setDescricao(e.target.value);
+            setListaAberta(true);
+            setIndice(-1);
+          }}
+          onKeyDown={aoTeclarNaDescricao}
+          onBlur={() => setListaAberta(false)}
+        />
+        {listaVisivel && (
+          <ul className="novo-item__sugestoes" role="listbox" id={idLista} aria-label="Descrições já usadas">
+            {sugestoes.map((sugestao, i) => (
+              <li
+                key={sugestao}
+                id={`${idLista}-${i}`}
+                role="option"
+                aria-selected={i === ativo}
+                className={`novo-item__sugestao${i === ativo ? " novo-item__sugestao--ativa" : ""}`}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setIndice(i)}
+                onClick={() => {
+                  aceitar(sugestao);
+                  focar("quantidade");
+                }}
+              >
+                {sugestao}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       <Campo
         rotulo="Quantidade"
         name="quantidade"

@@ -204,5 +204,50 @@ def test_pagas(logado, cliente, usuario):
 
 
 def test_leitura_exige_login(client, cliente):
-    for caminho in ["/api/painel", "/api/busca?q=1", "/api/clientes", "/api/clientes/1", "/api/notas/1-1", "/api/pagas"]:
+    for caminho in ["/api/painel", "/api/busca?q=1", "/api/clientes", "/api/clientes/1", "/api/notas/1-1", "/api/pagas", "/api/itens/sugestoes?q=ra"]:
         assert client.get(caminho).status_code == 401
+
+
+def _lancar(cliente, usuario, *descricoes):
+    nota = criar_nota(cliente=cliente, tipo=Nota.Tipo.UNICA, usuario=usuario)
+    for descricao in descricoes:
+        nota = adicionar_item(
+            nota=nota,
+            versao=nota.versao,
+            descricao=descricao,
+            quantidade=Decimal("1"),
+            preco_unitario=Decimal("10.00"),
+            usuario=usuario,
+        )
+
+
+def _sugestoes(logado, termo):
+    return logado.get("/api/itens/sugestoes", {"q": termo}).json()["sugestoes"]
+
+
+def test_sugestoes_ignoram_acento_e_caixa_e_casam_inicio_de_palavra(logado, cliente, usuario):
+    _lancar(cliente, usuario, "Ração cães 15kg", "Saco de ração", "Coleira", "Arame")
+    assert sorted(_sugestoes(logado, "ra")) == ["Ração cães 15kg", "Saco de ração"]
+    assert _sugestoes(logado, "RAÇ") == _sugestoes(logado, "ra")
+    assert _sugestoes(logado, "racao ca") == ["Ração cães 15kg"]
+
+
+def test_sugestoes_trazem_as_mais_usadas_primeiro(logado, cliente, usuario):
+    _lancar(cliente, usuario, "Ração gatos", "Ração cães", "Ração cães", "Ração aves", "Ração aves", "Ração aves")
+    assert _sugestoes(logado, "ra") == ["Ração aves", "Ração cães", "Ração gatos"]
+
+
+def test_sugestoes_juntam_grafias_iguais_e_mostram_a_mais_usada(logado, cliente, usuario):
+    _lancar(cliente, usuario, "racao", "Ração", "Ração", "Milho", "Milho")
+    assert _sugestoes(logado, "ra") == ["Ração"]
+    assert _sugestoes(logado, "mi") == ["Milho"]
+    _lancar(cliente, usuario, "Ração Premium", "Ração Premium", "ração premium")
+    assert _sugestoes(logado, "ra") == ["Ração", "Ração Premium"]
+
+
+def test_sugestoes_limitam_a_8_e_pedem_duas_letras(logado, cliente, usuario):
+    _lancar(cliente, usuario, *[f"Ração tipo {indice}" for indice in range(10)])
+    assert len(_sugestoes(logado, "ra")) == 8
+    assert _sugestoes(logado, "r") == []
+    assert _sugestoes(logado, " ") == []
+    assert logado.get("/api/itens/sugestoes").json() == {"sugestoes": []}
