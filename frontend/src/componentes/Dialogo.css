@@ -24,7 +24,12 @@
 }
 .dialogo:focus { outline: none; }
 
-.dialogo__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.dialogo__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-titulo);
+  font-weight: var(--peso-titulo);
+  letter-spacing: var(--espaco-letras-titulo);
+}
 .dialogo__mensagem { color: var(--cor-texto-secundario); }
 .dialogo__acoes { display: flex; justify-content: flex-end; gap: var(--espaco-2); }
 

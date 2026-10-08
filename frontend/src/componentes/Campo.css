@@ -10,6 +10,11 @@
   border-radius: var(--raio-controle);
 }
 
+.campo__entrada:focus-visible { border-color: var(--cor-acao); }
+
+/* O que se digita alinha com o que se lê: valor e quantidade usam a fonte dos números. */
+.campo__entrada[inputmode="decimal"] { font-family: var(--fonte-numero); font-variant-numeric: tabular-nums; }
+
 .campo__entrada[aria-invalid="true"] { border-color: var(--cor-erro-texto); }
 
 .campo__erro { font-size: var(--texto-pequeno); color: var(--cor-erro-texto); }
