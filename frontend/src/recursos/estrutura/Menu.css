@@ -11,7 +11,7 @@
   color: var(--cor-menu-texto);
 }
 
-/* Azul sobre azul não se vê: dentro do menu o foco é amarelo. */
+/* Azul sobre azul não se vê: dentro do menu o foco é laranja. */
 .menu :focus-visible { outline-color: var(--cor-destaque); }
 
 .menu__marca { padding: 0 var(--espaco-1); }
@@ -31,6 +31,7 @@
   background: var(--cor-menu-ativo-fundo);
   color: var(--cor-menu-ativo-texto);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--cor-destaque);
 }
 
 .menu__rodape {
