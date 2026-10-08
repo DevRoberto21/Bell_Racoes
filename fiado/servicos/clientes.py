@@ -2,8 +2,7 @@ import re
 
 from django.db import transaction
 
-from fiado.api.validacao import DadosInvalidos
-from fiado.erros import ErroDeRegra
+from fiado.erros import DadosInvalidos, ErroDeRegra
 from fiado.models import Cliente, Sequencia
 
 MENSAGEM_TELEFONE = "Telefone incompleto. Use (dd)9xxxx-xxxx."

@@ -1,6 +1,6 @@
 import pytest
 
-from fiado.api.validacao import DadosInvalidos
+from fiado.erros import DadosInvalidos
 from fiado.models import Cliente, Nota
 from fiado.servicos.clientes import criar_cliente, editar_cliente
 from fiado.servicos.notas import criar_nota

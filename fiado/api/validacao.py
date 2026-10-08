@@ -1,13 +1,7 @@
 import re
 from decimal import Decimal
 
-
-class DadosInvalidos(Exception):
-    """Corpo da requisição com campo ausente ou em formato errado."""
-
-    def __init__(self, campos):
-        super().__init__("Confira os campos destacados.")
-        self.campos = campos
+from fiado.erros import DadosInvalidos
 
 
 def _falha(campo, mensagem):
