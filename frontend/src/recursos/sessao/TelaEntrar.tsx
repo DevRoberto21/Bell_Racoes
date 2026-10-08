@@ -49,6 +49,9 @@ export function TelaEntrar() {
   return (
     <main className="entrar">
       <form className="entrar__cartao" onSubmit={enviar}>
+        <span className="monograma" aria-hidden="true">
+          B
+        </span>
         <h1 className="entrar__nome">Bell Rações</h1>
         <p className="entrar__apoio">Entre para abrir o fiado.</p>
         {entrar.error && <Aviso tipo="erro">{entrar.error.message}</Aviso>}
