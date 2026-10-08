@@ -7,12 +7,20 @@
   flex-direction: column;
   gap: var(--espaco-1);
   padding: var(--espaco-5);
-  border: 1px solid var(--cor-borda);
   border-radius: var(--raio-cartao);
-  background: var(--cor-superficie);
+  background: var(--cor-destaque);
+  color: var(--cor-destaque-texto);
 }
-.painel__rotulo { color: var(--cor-texto-secundario); font-size: var(--texto-pequeno); }
-.painel__total { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.painel__rotulo { font-size: var(--texto-pequeno); font-weight: 600; }
+.painel__total {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-total);
+  font-weight: var(--peso-titulo);
+  letter-spacing: var(--espaco-letras-titulo);
+  line-height: 1.15;
+}
+/* O total é o único dinheiro em fonte de título: desfaz a fonte mono de `.numero`, mantém os algarismos tabulares. */
+.painel__total .numero { font-family: inherit; }
 
 .painel__secao {
   margin-top: var(--espaco-2);
