@@ -26,7 +26,7 @@ def test_criar_cliente(logado):
     assert resposta.status_code == 200
     corpo = resposta.json()
     assert corpo["codigo"] == 1
-    assert (corpo["nome"], corpo["apelido"], corpo["telefone"]) == ("Ana Souza", "Aninha", "85988880000")
+    assert (corpo["nome"], corpo["apelido"], corpo["telefone"]) == ("Ana Souza", "Aninha", "(85)98888-0000")
     assert corpo["divida"] == "0.00"
     assert corpo["pode_excluir"] is True
     assert Cliente.objects.get(codigo=1).nome == "Ana Souza"
@@ -67,7 +67,7 @@ def test_editar_cliente_mantem_numero_de_notas(logado, cliente, usuario):
     )
     assert resposta.status_code == 200
     corpo = resposta.json()
-    assert (corpo["nome"], corpo["apelido"], corpo["telefone"]) == ("Maria Souza", "", "85911112222")
+    assert (corpo["nome"], corpo["apelido"], corpo["telefone"]) == ("Maria Souza", "", "(85)91111-2222")
     assert corpo["divida"] == "10.00"
     cliente.refresh_from_db()
     assert cliente.nome == "Maria Souza"
@@ -210,3 +210,33 @@ def test_escrita_de_cliente_inexistente(logado, metodo, caminho, corpo):
     resposta = _chamar(logado, metodo, caminho.format(99), corpo)
     assert resposta.status_code == 404
     assert resposta.json() == {"erro": "Não encontrado.", "campos": {}}
+
+
+MENSAGEM_TELEFONE = "Telefone incompleto. Use (dd)9xxxx-xxxx."
+
+
+def test_criar_cliente_com_telefone_invalido(logado):
+    resposta = logado.post(
+        "/api/clientes", data={"nome": "Ana", "telefone": "8533334444"}, content_type=JSON
+    )
+    assert resposta.status_code == 400
+    assert resposta.json()["campos"] == {"telefone": MENSAGEM_TELEFONE}
+    assert Cliente.objects.count() == 0
+
+
+def test_editar_cliente_com_telefone_invalido(logado, cliente):
+    resposta = logado.patch(
+        "/api/clientes/1", data={"nome": "Maria", "telefone": "123"}, content_type=JSON
+    )
+    assert resposta.status_code == 400
+    assert resposta.json()["campos"] == {"telefone": MENSAGEM_TELEFONE}
+    cliente.refresh_from_db()
+    assert cliente.telefone == "(85)99999-0000"
+
+
+def test_criar_cliente_devolve_telefone_formatado(logado):
+    resposta = logado.post(
+        "/api/clientes", data={"nome": "Ana", "telefone": "11 91234-5678"}, content_type=JSON
+    )
+    assert resposta.status_code == 200
+    assert resposta.json()["telefone"] == "(11)91234-5678"

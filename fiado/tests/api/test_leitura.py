@@ -113,7 +113,7 @@ def test_lista_de_clientes(logado, cliente, usuario):
     assert [c["nome"] for c in corpo] == ["Ana", "Maria da Silva"]
     assert corpo[1] == {
         "codigo": 1, "codigo_formatado": "01", "nome": "Maria da Silva", "apelido": "Mariinha",
-        "telefone": "85999990000", "divida": "100.00", "notas_abertas": 1,
+        "telefone": "(85)99999-0000", "divida": "100.00", "notas_abertas": 1,
     }
     assert corpo[0]["divida"] == "0.00"
     assert [c["nome"] for c in logado.get("/api/clientes", {"q": "mariinha"}).json()] == ["Maria da Silva"]
