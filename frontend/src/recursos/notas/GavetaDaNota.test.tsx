@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -153,6 +153,40 @@ describe("GavetaDaNota", () => {
     simular(() => responder(nota({ dias_em_aberto: 1 })));
     abrir();
     expect(await screen.findByText("1 dia")).toBeInTheDocument();
+  });
+
+  it("nota que aceita itens abre com o foco em Descrição", async () => {
+    simular(() => responder(nota()));
+    abrir();
+    await waitFor(() => expect(screen.getByLabelText("Descrição")).toHaveFocus());
+  });
+
+  it("nota que não aceita itens deixa o foco onde a gaveta o pôs", async () => {
+    simular(() => responder(nota({ situacao: "FECHADA", situacao_rotulo: "Fechada", acoes: FECHADA })));
+    abrir();
+    await screen.findByText("Ração 15kg");
+    expect(screen.getByRole("button", { name: "Fechar" })).toHaveFocus();
+  });
+
+  it("não puxa o foco para Descrição se ele já saiu da gaveta enquanto a nota carregava", async () => {
+    const espera = adiado();
+    simular(async () => {
+      await espera.promessa;
+      return responder(nota());
+    });
+    renderizarComApp(
+      <>
+        <input aria-label="Fora" />
+        <GavetaDaNota />
+      </>,
+      { rota: "/?nota=01-01" },
+    );
+    await gaveta();
+    const fora = screen.getByLabelText("Fora");
+    act(() => fora.focus());
+    espera.liberar();
+    await screen.findByLabelText("Descrição");
+    expect(fora).toHaveFocus();
   });
 
   it("nota quitada e editada mostra os selos, a data da quitação e os pagamentos com recibo", async () => {

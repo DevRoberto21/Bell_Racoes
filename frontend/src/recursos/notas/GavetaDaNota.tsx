@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { formatarData } from "../../api/data";
 import { ErroApi } from "../../api/http";
@@ -86,6 +86,18 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
   const [nota, setNota] = useState<Nota>();
   if (consulta.data && consulta.data !== nota) setNota(consulta.data);
 
+  const corpoDaNota = useRef<HTMLDivElement>(null);
+  // Quando a nota chega, a gaveta já abriu e o foco está no botão de fechar: o campo Descrição ainda não existia.
+  // Leva o foco para lá uma vez por abertura, e só se ele ainda estiver na gaveta e fora do conteúdo da nota.
+  const carregada = nota !== undefined;
+  useEffect(() => {
+    const corpo = corpoDaNota.current;
+    if (!carregada || !corpo) return;
+    const ativo = document.activeElement;
+    if (!corpo.closest('[role="dialog"]')?.contains(ativo) || corpo.contains(ativo)) return;
+    corpo.querySelector<HTMLInputElement>('input[name="descricao"]')?.focus();
+  }, [carregada]);
+
   const adicionar = useAdicionarItem(codigo);
   const remover = useRemoverItem(codigo);
   const finalizar = useFinalizar(codigo);
@@ -155,7 +167,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
     }
     const { acoes } = nota;
     return (
-      <div className="nota" data-modo={modo}>
+      <div className="nota" data-modo={modo} ref={corpoDaNota}>
         <header className="nota__cabecalho">
           <Link className="nota__cliente" to={`/clientes/${nota.cliente.codigo}`}>
             {nota.cliente.codigo_formatado} · {nota.cliente.nome}
