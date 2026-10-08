@@ -50,6 +50,38 @@ def notas_em_aberto(cliente):
     return cliente.notas.exclude(situacao=S.QUITADA).order_by("criada_em", "numero")
 
 
+def continuas_abertas(clientes):
+    """A nota contínua aberta de cada cliente da lista e o saldo dela, em três consultas.
+
+    Devolve {cliente_id: (nota, saldo)}; cliente sem contínua aberta fica de fora.
+    """
+    notas = list(
+        Nota.objects.filter(
+            cliente__in=clientes, tipo=Nota.Tipo.CONTINUA, situacao=S.ABERTA
+        ).select_related("cliente")
+    )
+    ids = [nota.id for nota in notas]
+    comprado = dict(
+        ItemNota.objects.filter(nota__in=ids)
+        .order_by()
+        .values_list("nota_id")
+        .annotate(total=Sum("subtotal"))
+    )
+    pago = dict(
+        Pagamento.objects.filter(nota__in=ids)
+        .order_by()
+        .values_list("nota_id")
+        .annotate(total=Sum("valor"))
+    )
+    return {
+        nota.cliente_id: (
+            nota,
+            ((comprado.get(nota.id) or ZERO) - (pago.get(nota.id) or ZERO)).quantize(CENTAVO),
+        )
+        for nota in notas
+    }
+
+
 def notas_em_alerta(hoje=None):
     hoje = hoje or timezone.localdate()
     notas = Nota.objects.filter(situacao__in=EM_DIVIDA).select_related("cliente")

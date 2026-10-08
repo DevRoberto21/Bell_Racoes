@@ -2,11 +2,13 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from fiado.models import Nota
 from fiado.servicos.clientes import criar_cliente
-from fiado.servicos.notas import adicionar_item, criar_nota
+from fiado.servicos.notas import adicionar_item, criar_nota, fechar_nota
 from fiado.servicos.pagamentos import pagar_divida_total, registrar_pagamento
 from fiado.tests.fabrica import nota_continua_aberta, nota_unica_fechada
 
@@ -191,6 +193,47 @@ def test_busca_por_texto_limita_a_8(logado):
         criar_cliente(nome=f"Cliente {indice}")
     assert len(logado.get("/api/busca", {"q": "cliente"}).json()["clientes"]) == 8
     assert logado.get("/api/busca", {"q": ""}).json() == {"tipo": "lista", "clientes": []}
+
+
+def test_busca_por_nome_traz_a_continua_aberta(logado, cliente, usuario):
+    nota_unica_fechada(cliente, usuario, "30.00")
+    continua = nota_continua_aberta(cliente, usuario, "70.00", criada_em=_ha(9))
+    _pagar(continua, usuario, "20.00")
+    criar_cliente(nome="Mário Lima")
+    clientes = logado.get("/api/busca", {"q": "ma"}).json()["clientes"]
+    por_nome = {c["nome"]: c for c in clientes}
+    assert por_nome["Maria da Silva"]["continua_aberta"] == {
+        "codigo": "01-02", "saldo": "50.00", "dias_em_aberto": 9,
+    }
+    assert por_nome["Mário Lima"]["continua_aberta"] is None
+    assert por_nome["Maria da Silva"]["divida"] == "80.00"
+
+
+def test_busca_por_nome_ignora_continua_fechada_e_nota_unica(logado, cliente, usuario):
+    continua = nota_continua_aberta(cliente, usuario, "70.00")
+    fechar_nota(nota=continua, versao=continua.versao)
+    nota_unica_fechada(cliente, usuario, "30.00")
+    clientes = logado.get("/api/busca", {"q": "maria"}).json()["clientes"]
+    assert clientes[0]["continua_aberta"] is None
+
+
+def test_lista_de_clientes_nao_traz_a_continua_aberta(logado, cliente, usuario):
+    nota_continua_aberta(cliente, usuario, "70.00")
+    assert "continua_aberta" not in logado.get("/api/clientes").json()[0]
+
+
+def _consultas_da_busca(logado, termo):
+    with CaptureQueriesContext(connection) as feitas:
+        logado.get("/api/busca", {"q": termo})
+    return len(feitas)
+
+
+def test_busca_por_nome_nao_faz_consulta_por_cliente(logado, usuario):
+    nota_continua_aberta(criar_cliente(nome="Cliente 0"), usuario)
+    com_um = _consultas_da_busca(logado, "cliente")
+    for indice in range(1, 4):
+        nota_continua_aberta(criar_cliente(nome=f"Cliente {indice}"), usuario)
+    assert _consultas_da_busca(logado, "cliente") == com_um
 
 
 def test_pagas(logado, cliente, usuario):

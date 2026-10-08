@@ -38,6 +38,26 @@ def linhas_de_clientes(clientes):
     ]
 
 
+def _continua_aberta(par):
+    if par is None:
+        return None
+    nota, saldo = par
+    return {
+        "codigo": nota.codigo,
+        "saldo": dinheiro(saldo),
+        "dias_em_aberto": nota.dias_em_aberto(),
+    }
+
+
+def linhas_da_busca(clientes):
+    """Linhas de clientes para a busca por nome: cada uma leva a nota contínua aberta, se houver."""
+    continuas = consultas.continuas_abertas(clientes)
+    return [
+        linha | {"continua_aberta": _continua_aberta(continuas.get(cliente.id))}
+        for cliente, linha in zip(clientes, linhas_de_clientes(clientes))
+    ]
+
+
 def cliente_detalhe(cliente):
     notas = list(consultas.notas_em_aberto(cliente))
     return cliente_linha(cliente, consultas.divida_do_cliente(cliente), len(notas)) | {

@@ -5,7 +5,7 @@ from fiado.api.http import api
 from fiado.api.serializadores import (
     cliente_detalhe,
     dinheiro,
-    linhas_de_clientes,
+    linhas_da_busca,
     nota_resumo,
 )
 from fiado.backup import copia_de_hoje_existe
@@ -36,8 +36,8 @@ def busca(request):
         return {"tipo": "nao_encontrado", "mensagem": resultado.mensagem}
     if not resultado.termo:
         return {"tipo": "lista", "clientes": []}
-    clientes = filtrar_clientes(resultado.termo)[:LIMITE_BUSCA]
-    return {"tipo": "lista", "clientes": linhas_de_clientes(clientes)}
+    clientes = list(filtrar_clientes(resultado.termo)[:LIMITE_BUSCA])
+    return {"tipo": "lista", "clientes": linhas_da_busca(clientes)}
 
 
 @api("GET")
