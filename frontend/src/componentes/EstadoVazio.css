@@ -1,6 +1,7 @@
 .estado-vazio {
   padding: var(--espaco-4);
-  border-radius: var(--raio-controle);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
   color: var(--cor-texto-apoio);
   font-size: var(--texto-pequeno);

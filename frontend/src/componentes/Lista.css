@@ -1,13 +1,19 @@
 .lista {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-2);
   margin: 0;
   padding: 0;
   list-style: none;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  overflow: hidden;
 }
 
 .lista__item { display: flex; align-items: center; gap: var(--espaco-2); }
+.lista__item + .lista__item { border-top: 1px solid var(--cor-borda); }
+/* Ação ao lado da linha (ex.: Contas pagas): não encosta na borda do cartão. */
+.lista__item > :not(.lista__linha) { margin-right: var(--espaco-3); }
 
 /* Entrada em sequência, só os oito primeiros; o último termina antes de --tempo-base. */
 .lista__item:nth-child(-n + 8) {
@@ -36,11 +42,13 @@
   min-height: 48px;
   padding: var(--espaco-3) var(--espaco-4);
   border: 0;
-  border-radius: var(--raio-controle);
-  background: var(--cor-superficie);
+  border-radius: 0;
+  background: transparent;
   text-align: left;
   cursor: pointer;
   transition: background var(--tempo-micro), transform var(--tempo-micro);
 }
 .lista__linha:hover { background: var(--cor-acao-suave); }
 .lista__linha:active { transform: scale(0.985); }
+/* O cartão corta o que passa da borda: o contorno de foco fica por dentro da linha. */
+.lista__linha:focus-visible { outline-offset: -2px; }
