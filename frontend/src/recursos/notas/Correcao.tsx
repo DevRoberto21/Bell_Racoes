@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ErroApi } from "../../api/http";
 import { formatarDinheiro, formatarQuantidade, paraDecimal } from "../../api/numero";
 import type { ItemNota } from "../../api/tipos";
@@ -13,6 +13,8 @@ interface Props {
   /** Versão da nota a que `itens` pertence. */
   versao: number;
   /** Recebe a lista e a versão da nota que o formulário copiou ao abrir. Rejeita quando a correção não entra; o erro aparece aqui no formulário. */
+  /** Linha cuja descrição recebe o foco ao abrir; a primeira quando ausente. */
+  linhaInicial?: number;
   aoSalvar: (itens: DadosItem[], versao: number) => Promise<unknown>;
   aoCancelar: () => void;
 }
@@ -31,7 +33,7 @@ const COLUNAS: { campo: CampoDoItem; rotulo: string; numerico: boolean }[] = [
 const chaveDoErro = (linha: number, campo: CampoDoItem) => `itens.${linha}.${campo}`;
 
 /** Os itens da nota como campos editáveis, no lugar da lista. */
-export function Correcao({ itens, versao, aoSalvar, aoCancelar }: Props) {
+export function Correcao({ itens, versao, linhaInicial = 0, aoSalvar, aoCancelar }: Props) {
   const formulario = useRef<HTMLFormElement>(null);
   const idDosErros = useId();
   // As linhas guardam o texto como aparece na tela; nunca saem do lugar, então o índice identifica cada uma.
@@ -48,10 +50,12 @@ export function Correcao({ itens, versao, aoSalvar, aoCancelar }: Props) {
   const [falha, setFalha] = useState<string>();
   const [enviando, setEnviando] = useState(false);
   // Linha cuja descrição recebe o foco: a primeira ao abrir, a nova ao adicionar.
-  const [linhaEmFoco, setLinhaEmFoco] = useState(0);
+  const [linhaEmFoco, setLinhaEmFoco] = useState(linhaInicial);
 
   useEffect(() => {
-    formulario.current?.querySelector<HTMLInputElement>(`[name="descricao-${linhaEmFoco}"]`)?.focus();
+    const campo = formulario.current?.querySelector<HTMLInputElement>(`[name="descricao-${linhaEmFoco}"]`);
+    campo?.focus();
+    campo?.select(); // digitar já substitui o que estava escrito
   }, [linhaEmFoco]);
 
   function mudar(linha: number, campo: CampoDoItem, texto: string) {
@@ -61,6 +65,13 @@ export function Correcao({ itens, versao, aoSalvar, aoCancelar }: Props) {
       delete resto[chaveDoErro(linha, campo)];
       return resto;
     });
+  }
+
+  function aoTeclar(evento: KeyboardEvent<HTMLFormElement>) {
+    if (evento.key !== "Escape") return;
+    evento.preventDefault();
+    evento.stopPropagation(); // cancela só a correção, não fecha a gaveta em volta
+    if (!enviando) aoCancelar();
   }
 
   async function enviar(evento: FormEvent) {
@@ -91,7 +102,7 @@ export function Correcao({ itens, versao, aoSalvar, aoCancelar }: Props) {
   }
 
   return (
-    <form ref={formulario} className="correcao" aria-label="Correção dos itens" noValidate onSubmit={enviar}>
+    <form ref={formulario} className="correcao" aria-label="Correção dos itens" noValidate onSubmit={enviar} onKeyDown={aoTeclar}>
       <h3 className="correcao__titulo">Itens</h3>
       {falha && <Aviso tipo="erro">{falha}</Aviso>}
       <div className="correcao__linhas">

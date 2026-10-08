@@ -38,3 +38,22 @@
 }
 .itens__remover:hover:not(:disabled) { background: var(--cor-erro-fundo); }
 .itens__remover:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* A linha inteira como botão: mesmas colunas da linha comum, com a área de toque estendida ao espaçamento da linha. */
+.itens__corrigir {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--espaco-3);
+  margin: calc(-1 * var(--espaco-2));
+  padding: var(--espaco-2);
+  border: 0;
+  border-radius: var(--raio-controle);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--tempo-micro) ease;
+}
+.itens__corrigir:hover:not(:disabled) { background: var(--cor-acao-suave); }
+.itens__corrigir:disabled { cursor: not-allowed; }

@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { adiado, notaDeTeste, simularFetch } from "../../teste/notas";
+import { ACOES_FECHADA, adiado, notaDeTeste, simularFetch } from "../../teste/notas";
 import { renderizarComApp, responder } from "../../teste/renderizar";
 import { GavetaDaNota } from "./GavetaDaNota";
 
@@ -54,6 +54,26 @@ async function abrirCorrecao(rotas: (chave: string) => unknown, dados = () => no
 
 const formulario = () => screen.queryByRole("form", { name: "Correção dos itens" });
 const descricao = (n: number) => screen.getByLabelText(`Descrição do item ${n}`);
+
+/** Abre a gaveta da nota 01-01 sem entrar em modo nenhum. */
+async function abrirNota(dados = () => notaDeTeste()) {
+  const api = simularFetch((chave) => (chave === GET_NOTA ? responder(dados()) : undefined));
+  renderizarComApp(<GavetaDaNota />, { rota: "/?nota=01-01" });
+  const usuario = userEvent.setup();
+  await screen.findByText("Ração 15kg");
+  return { api, usuario };
+}
+
+const continuaAberta = () =>
+  notaDeTeste({ tipo: "CONTINUA", tipo_rotulo: "Contínua", situacao: "ABERTA", situacao_rotulo: "Aberta", acoes: { ...ACOES_FECHADA, adicionar_item: true, fechar: true } });
+const rascunho = () =>
+  notaDeTeste({
+    situacao: "RASCUNHO",
+    situacao_rotulo: "Rascunho",
+    acoes: { ...ACOES_FECHADA, receber: false, corrigir: false, imprimir: false, adicionar_item: true, remover_item: true },
+  });
+const linhaDoItem = (descricaoDoItem: RegExp) => screen.queryByRole("button", { name: descricaoDoItem });
+const gavetaAberta = () => screen.queryByRole("dialog", { name: "Nota 01-01" });
 const quantidade = (n: number) => screen.getByLabelText(`Quantidade do item ${n}`);
 const preco = (n: number) => screen.getByLabelText(`Preço do item ${n}`);
 const salvar = () => screen.getByRole("button", { name: "Salvar correção e reimprimir" });
@@ -251,5 +271,74 @@ describe("Correcao", () => {
     espera.liberar();
     await waitFor(() => expect(formulario()).not.toBeInTheDocument());
     expect(api.quantas(PUT)).toBe(1);
+  });
+
+  it("clicar num item abre a correção com o foco e o texto selecionado naquela linha", async () => {
+    const { usuario } = await abrirNota();
+    await usuario.click(linhaDoItem(/Milho/)!);
+    expect(formulario()).toBeInTheDocument();
+    const campo = descricao(2) as HTMLInputElement;
+    expect(campo).toHaveFocus();
+    expect([campo.selectionStart, campo.selectionEnd]).toEqual([0, "Milho".length]);
+  });
+
+  it("Enter com o foco num item abre a correção naquela linha", async () => {
+    const { usuario } = await abrirNota();
+    act(() => linhaDoItem(/Ração 15kg/)!.focus());
+    await usuario.keyboard("{Enter}");
+    expect(descricao(1)).toHaveFocus();
+  });
+
+  it("o botão Correção do rodapé abre na primeira linha, com o texto selecionado", async () => {
+    await abrirCorrecao(() => undefined);
+    const campo = descricao(1) as HTMLInputElement;
+    expect(campo).toHaveFocus();
+    expect([campo.selectionStart, campo.selectionEnd]).toEqual([0, "Ração 15kg".length]);
+  });
+
+  it("em rascunho os itens não abrem correção", async () => {
+    await abrirNota(rascunho);
+    expect(linhaDoItem(/Milho/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Remover" })).toHaveLength(2);
+  });
+
+  it("em Receber os itens não abrem correção", async () => {
+    const { usuario } = await abrirNota();
+    await usuario.click(screen.getByRole("button", { name: "Receber" }));
+    expect(linhaDoItem(/Milho/)).not.toBeInTheDocument();
+    expect(screen.getByText("Milho")).toBeInTheDocument();
+  });
+
+  it("Esc cancela a correção sem fechar a gaveta; o segundo Esc fecha a gaveta", async () => {
+    const { api, usuario } = await abrirCorrecao(() => undefined);
+    await trocar(usuario, descricao(1), "Outra coisa");
+    await usuario.keyboard("{Escape}");
+    expect(formulario()).not.toBeInTheDocument();
+    expect(gavetaAberta()).toBeInTheDocument();
+    expect(screen.getByText("Ração 15kg")).toBeInTheDocument();
+    expect(api.chamadas()).toEqual([GET_NOTA]);
+    await usuario.keyboard("{Escape}");
+    await waitFor(() => expect(gavetaAberta()).not.toBeInTheDocument());
+  });
+
+  it("Esc não cancela enquanto a correção está sendo salva", async () => {
+    vi.spyOn(window, "open").mockReturnValue(null);
+    const espera = adiado();
+    const { usuario } = await abrirCorrecao((chave) => (chave === PUT ? espera.promessa.then(() => responder(corrigida())) : undefined));
+    await trocar(usuario, preco(1), "42,50");
+    await usuario.click(salvar());
+    act(() => descricao(1).focus());
+    await usuario.keyboard("{Escape}");
+    expect(formulario()).toBeInTheDocument();
+    expect(gavetaAberta()).toBeInTheDocument();
+    espera.liberar();
+    await waitFor(() => expect(formulario()).not.toBeInTheDocument());
+  });
+
+  it("ao sair da correção, o foco volta para Descrição do novo item", async () => {
+    const { usuario } = await abrirCorrecao(() => undefined, continuaAberta);
+    await usuario.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(formulario()).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Descrição")).toHaveFocus();
   });
 });

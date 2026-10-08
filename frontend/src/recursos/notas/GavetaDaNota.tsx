@@ -119,12 +119,27 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
   const [confirmandoDescarte, setConfirmandoDescarte] = useState(false);
   // Em "receber" e "corrigir" o formulário do modo toma o lugar das ações do rodapé.
   const [modo, setModo] = useState<"ver" | "receber" | "corrigir">("ver");
+  // Linha em que a correção abre: a do item acionado, ou a primeira pelo botão do rodapé.
+  const [linhaDaCorrecao, setLinhaDaCorrecao] = useState(0);
 
   const falhar = (erro: unknown) => setFalha(tratarErroDeNota(clienteDeConsulta, erro, codigo));
   const entrarEm = (novo: "receber" | "corrigir") => {
     setFalha(null);
     setModo(novo);
   };
+  const corrigirLinha = (linha: number) => {
+    setLinhaDaCorrecao(linha);
+    entrarEm("corrigir");
+  };
+
+  // Saindo da correção (salva, cancelada ou em conflito), o foco volta à linha de novo item, quando a nota tem uma.
+  const modoAnterior = useRef(modo);
+  useEffect(() => {
+    if (modoAnterior.current === "corrigir" && modo === "ver") {
+      corpoDaNota.current?.querySelector<HTMLInputElement>('input[name="descricao"]')?.focus();
+    }
+    modoAnterior.current = modo;
+  }, [modo]);
   /** Erro de Receber ou Correção: o conflito (409) volta à leitura com o aviso; os demais ficam com o formulário. */
   const falharNoModo = (erro: unknown) => {
     if (!(erro instanceof ErroApi && erro.status === 409)) throw erro;
@@ -189,6 +204,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
           <Correcao
             itens={nota.itens}
             versao={nota.versao}
+            linhaInicial={linhaDaCorrecao}
             aoCancelar={() => setModo("ver")}
             aoSalvar={(itens, versao) =>
               corrigir.mutateAsync({ itens, versao }).then((corrigida) => {
@@ -198,7 +214,12 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
             }
           />
         ) : (
-          <ItensDaNota itens={nota.itens} aoRemover={acoes.remover_item ? setItemARemover : undefined} bloqueado={gravando}>
+          <ItensDaNota
+            itens={nota.itens}
+            aoRemover={acoes.remover_item ? setItemARemover : undefined}
+            aoCorrigir={acoes.corrigir && modo === "ver" ? corrigirLinha : undefined}
+            bloqueado={gravando}
+          >
             {acoes.adicionar_item && modo === "ver" && (
               <LinhaNovoItem
                 bloqueado={gravando}
@@ -250,7 +271,7 @@ function NotaNaGaveta({ codigo, aberta, aoFechar }: Props) {
           </Botao>
         )}
         {acoes.corrigir && (
-          <Botao variante="contorno" disabled={gravando} onClick={() => entrarEm("corrigir")}>
+          <Botao variante="contorno" disabled={gravando} onClick={() => corrigirLinha(0)}>
             Correção
           </Botao>
         )}

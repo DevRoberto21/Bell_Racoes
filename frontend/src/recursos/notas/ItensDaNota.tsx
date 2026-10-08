@@ -10,13 +10,15 @@ interface Props {
   itens: ItemNota[];
   /** Presente só quando a nota permite remover itens. */
   aoRemover?: (item: ItemNota) => void;
+  /** Presente só quando a nota pode ser corrigida: a linha vira um botão que abre a correção nela. Recebe a posição do item. */
+  aoCorrigir?: (indice: number) => void;
   /** Uma gravação da nota está em curso. */
   bloqueado?: boolean;
   /** Linha de novo item, no fim da lista. */
   children?: ReactNode;
 }
 
-export function ItensDaNota({ itens, aoRemover, bloqueado = false, children }: Props) {
+export function ItensDaNota({ itens, aoRemover, aoCorrigir, bloqueado = false, children }: Props) {
   return (
     <section className="itens">
       <h3 className="itens__titulo">Itens</h3>
@@ -25,28 +27,47 @@ export function ItensDaNota({ itens, aoRemover, bloqueado = false, children }: P
         <ul className="itens__lista">
           {/* initial={false}: só o item que chega depois entra animado, não a lista que já veio com a nota. */}
           <AnimatePresence initial={false}>
-            {itens.map((item) => (
-              <motion.li
-                key={item.id}
-                className="itens__linha"
-                initial={{ opacity: 0, y: "50%" }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={molaBase()}
-              >
-                <span className="itens__descricao">{item.descricao}</span>
-                <span className="numero itens__conta">
-                  {formatarQuantidade(item.quantidade)} × <Dinheiro valor={item.preco_unitario} />
-                </span>
-                <span className="itens__subtotal">
-                  <Dinheiro valor={item.subtotal} />
-                </span>
-                {aoRemover && (
-                  <button type="button" className="itens__remover" disabled={bloqueado} onClick={() => aoRemover(item)}>
-                    Remover
-                  </button>
-                )}
-              </motion.li>
-            ))}
+            {itens.map((item, indice) => {
+              const dados = (
+                <>
+                  <span className="itens__descricao">{item.descricao}</span>
+                  <span className="numero itens__conta">
+                    {formatarQuantidade(item.quantidade)} × <Dinheiro valor={item.preco_unitario} />
+                  </span>
+                  <span className="itens__subtotal">
+                    <Dinheiro valor={item.subtotal} />
+                  </span>
+                </>
+              );
+              return (
+                <motion.li
+                  key={item.id}
+                  className="itens__linha"
+                  initial={{ opacity: 0, y: "50%" }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={molaBase()}
+                >
+                  {aoCorrigir ? (
+                    <button
+                      type="button"
+                      className="itens__corrigir"
+                      title="Corrigir este item"
+                      disabled={bloqueado}
+                      onClick={() => aoCorrigir(indice)}
+                    >
+                      {dados}
+                    </button>
+                  ) : (
+                    dados
+                  )}
+                  {aoRemover && (
+                    <button type="button" className="itens__remover" disabled={bloqueado} onClick={() => aoRemover(item)}>
+                      Remover
+                    </button>
+                  )}
+                </motion.li>
+              );
+            })}
           </AnimatePresence>
         </ul>
       )}
