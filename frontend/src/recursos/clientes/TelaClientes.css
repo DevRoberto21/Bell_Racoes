@@ -10,6 +10,7 @@
   border: 1px solid var(--cor-borda-forte);
   border-radius: var(--raio-controle);
 }
+.clientes__entrada:focus-visible { border-color: var(--cor-acao); }
 .clientes__codigo { min-width: 4ch; font-weight: 650; }
 .clientes__nome { flex: 1; min-width: 0; }
 .clientes__apoio { min-width: 8ch; color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }

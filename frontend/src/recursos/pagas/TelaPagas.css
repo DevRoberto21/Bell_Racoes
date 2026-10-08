@@ -1,6 +1,8 @@
 .pagas { display: flex; flex-direction: column; gap: var(--espaco-4); }
 .pagas__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
 .pagas__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
+/* Frase com número no meio: fica na fonte do corpo, só os algarismos seguem tabulares. */
+.pagas__apoio.numero { font-family: inherit; }
 .pagas__explicacao { color: var(--cor-texto-secundario); }
 .pagas__codigo { min-width: 6ch; font-weight: 650; }
 .pagas__cliente { flex: 1; min-width: 0; }

@@ -3,6 +3,8 @@
 .cliente__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
 .cliente__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
 .cliente__divida { display: flex; align-items: baseline; gap: var(--espaco-2); font-size: var(--texto-titulo); }
+/* Total da dívida: fonte dos títulos, como o total do painel. */
+.cliente__divida .numero { font-family: var(--fonte-titulo); font-weight: var(--peso-titulo); letter-spacing: var(--espaco-letras-titulo); }
 .cliente__acoes { display: flex; flex-wrap: wrap; gap: var(--espaco-2); }
 .cliente__secao { font-size: var(--texto-corpo); font-weight: 650; color: var(--cor-texto-secundario); }
 .cliente__codigo { min-width: 6ch; font-weight: 650; }

@@ -19,7 +19,7 @@
   letter-spacing: var(--espaco-letras-titulo);
   line-height: 1.15;
 }
-/* O total é o único dinheiro em fonte de título: desfaz a fonte mono de `.numero`, mantém os algarismos tabulares. */
+/* Total em fonte de título: desfaz a fonte mono de `.numero`, mantém os algarismos tabulares. */
 .painel__total .numero { font-family: inherit; }
 
 .painel__secao {

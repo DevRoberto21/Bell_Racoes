@@ -19,6 +19,8 @@
 }
 
 .nota__apoio { color: var(--cor-texto-apoio); font-size: var(--texto-pequeno); }
+/* Frase com número no meio: fica na fonte do corpo, só os algarismos seguem tabulares. */
+.nota__apoio.numero { font-family: inherit; }
 
 .nota__falha { margin-bottom: var(--espaco-4); }
 /* Quem desliza aqui é o invólucro (motion): o aviso de dentro não anima de novo. */

@@ -30,7 +30,9 @@
   border-bottom: 1px solid var(--cor-borda);
 }
 
-.gaveta__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.gaveta__titulo { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); letter-spacing: var(--espaco-letras-titulo); }
+/* O título leva `.numero` pelos algarismos tabulares do código; a fonte é a dos títulos. */
+.gaveta__titulo.numero { font-family: var(--fonte-titulo); }
 
 .gaveta__fechar {
   display: grid;

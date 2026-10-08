@@ -50,4 +50,7 @@
   color: var(--cor-texto);
   font-size: var(--texto-titulo);
   font-weight: var(--peso-titulo);
+  font-family: var(--fonte-titulo);
+  letter-spacing: var(--espaco-letras-titulo);
 }
+.resumo__linha--saldo .numero { font-family: inherit; }
