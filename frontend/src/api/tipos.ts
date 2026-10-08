@@ -20,6 +20,17 @@ export interface ClienteLinha {
   notas_abertas: number;
 }
 
+/** Nota contínua aberta de um cliente, como vem na busca por nome. */
+export interface ContinuaAberta {
+  codigo: string;
+  saldo: string;
+  dias_em_aberto: number;
+}
+
+export interface ClienteDaBusca extends ClienteLinha {
+  continua_aberta: ContinuaAberta | null;
+}
+
 export interface NotaResumo {
   codigo: string;
   cliente: { codigo: number; codigo_formatado: string; nome: string };
@@ -93,7 +104,7 @@ export type ResultadoBusca =
   | { tipo: "nota"; nota: NotaResumo }
   | { tipo: "cliente"; cliente: ClienteDetalhe }
   | { tipo: "nao_encontrado"; mensagem: string }
-  | { tipo: "lista"; clientes: ClienteLinha[] };
+  | { tipo: "lista"; clientes: ClienteDaBusca[] };
 
 export interface PreviaDivida {
   divida: string;

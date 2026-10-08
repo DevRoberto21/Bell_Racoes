@@ -1,7 +1,7 @@
 import { act, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClienteDetalhe, NotaResumo } from "../../api/tipos";
+import type { ClienteDaBusca, ClienteDetalhe, NotaResumo } from "../../api/tipos";
 import { renderizarComApp, responder } from "../../teste/renderizar";
 import { Busca } from "./Busca";
 
@@ -37,6 +37,23 @@ const cliente: ClienteDetalhe = {
   tem_continua_aberta: false,
   pode_excluir: false,
 };
+
+function linha(extra: Partial<ClienteDaBusca> = {}): ClienteDaBusca {
+  return {
+    codigo: 12,
+    codigo_formatado: "12",
+    nome: "José Pereira",
+    apelido: "Zé",
+    telefone: "",
+    divida: "241.10",
+    notas_abertas: 2,
+    continua_aberta: { codigo: "12-03", saldo: "97.00", dias_em_aberto: 9 },
+    ...extra,
+  };
+}
+
+const semContinua = () =>
+  linha({ codigo: 31, codigo_formatado: "31", nome: "José Lima", divida: "0.00", notas_abertas: 0, continua_aberta: null });
 
 let fetchSimulado: ReturnType<typeof vi.fn>;
 
@@ -127,6 +144,38 @@ describe("Busca", () => {
     renderizarComApp(<Busca />);
     await digitar("zzz");
     expect(screen.getByText("Nenhum cliente encontrado.")).toBeInTheDocument();
+  });
+
+  it("por nome, a contínua aberta aparece abaixo do cliente; Enter ainda abre o cliente", async () => {
+    simular({ tipo: "lista", clientes: [linha(), semContinua()] });
+    renderizarComApp(<Busca />);
+    const { usuario } = await digitar("jos");
+    const opcoes = screen.getAllByRole("option");
+    expect(opcoes).toHaveLength(3);
+    expect(opcoes[0]).toHaveTextContent("José Pereira");
+    expect(opcoes[1]).toHaveTextContent("12-03");
+    expect(opcoes[1]).toHaveTextContent("Contínua · 9 dias");
+    expect(opcoes[1]).toHaveTextContent("R$ 97,00");
+    expect(opcoes[2]).toHaveTextContent("José Lima");
+    await usuario.keyboard("{Enter}");
+    expect(screen.getByTestId("local")).toHaveTextContent("/clientes/12");
+  });
+
+  it("por nome, seta para baixo + Enter abre a gaveta da contínua", async () => {
+    simular({ tipo: "lista", clientes: [linha(), semContinua()] });
+    renderizarComApp(<Busca />);
+    const { usuario, campo } = await digitar("jos");
+    await usuario.keyboard("{ArrowDown}{Enter}");
+    expect(screen.getByTestId("local")).toHaveTextContent("/?nota=12-03");
+    expect(campo).toHaveValue("");
+  });
+
+  it("contínua de 1 dia usa o singular", async () => {
+    simular({ tipo: "lista", clientes: [linha({ continua_aberta: { codigo: "12-03", saldo: "97.00", dias_em_aberto: 1 } })] });
+    renderizarComApp(<Busca />);
+    await digitar("jos");
+    expect(screen.getAllByRole("option")[1]).toHaveTextContent("Contínua · 1 dia");
+    expect(screen.getAllByRole("option")[1]).not.toHaveTextContent("1 dias");
   });
 
   it("Esc fecha a lista e mantém o texto", async () => {

@@ -16,6 +16,8 @@ interface Opcao {
   detalhe?: string;
 }
 
+const dias = (quantos: number) => `${quantos} ${quantos === 1 ? "dia" : "dias"}`;
+
 export function Busca() {
   const [texto, setTexto] = useState("");
   const [aberta, setAberta] = useState(true);
@@ -46,7 +48,7 @@ export function Busca() {
         chave: n.codigo,
         destino: { nota: n.codigo },
         codigo: n.codigo,
-        nome: `${n.tipo_rotulo} · ${n.dias_em_aberto} dias`,
+        nome: `${n.tipo_rotulo} · ${dias(n.dias_em_aberto)}`,
         valor: n.saldo,
         detalhe: "nota",
       });
@@ -55,6 +57,17 @@ export function Busca() {
     if (resultado.clientes.length === 0) mensagem = "Nenhum cliente encontrado.";
     for (const c of resultado.clientes) {
       opcoes.push({ chave: `c${c.codigo}`, destino: { cliente: c.codigo }, codigo: c.codigo_formatado, nome: c.nome, valor: c.divida });
+      const continua = c.continua_aberta;
+      if (continua) {
+        opcoes.push({
+          chave: continua.codigo,
+          destino: { nota: continua.codigo },
+          codigo: continua.codigo,
+          nome: `Contínua · ${dias(continua.dias_em_aberto)}`,
+          valor: continua.saldo,
+          detalhe: "nota",
+        });
+      }
     }
   } else if (resultado?.tipo === "nao_encontrado") {
     mensagem = resultado.mensagem;
