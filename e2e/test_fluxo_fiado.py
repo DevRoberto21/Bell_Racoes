@@ -114,3 +114,31 @@ def test_busca_pelo_codigo_abre_a_gaveta_e_voltar_fecha(pagina, caixa):
     page.go_back()
     expect(gaveta).to_have_count(0)
     expect(page).not_to_have_url(re.compile(r"nota="))
+
+
+def test_da_busca_ao_item_na_continua_so_com_teclado(pagina, caixa):
+    from fiado.servicos.clientes import criar_cliente
+    from fiado.tests.fabrica import nota_continua_aberta
+
+    nota_continua_aberta(criar_cliente(nome="Maria da Silva", apelido="", telefone=""), caixa)
+    page = pagina
+    gaveta = page.get_by_role("dialog", name="Nota 01-01")
+    descricao = gaveta.get_by_label("Descrição")
+
+    page.keyboard.press("F2")
+    expect(page.get_by_role("combobox", name="Busca rápida")).to_be_focused()
+    page.keyboard.type("maria")
+    expect(page.get_by_role("option")).to_have_count(2)
+    page.keyboard.press("ArrowDown")
+    page.keyboard.press("Enter")
+
+    expect(descricao).to_be_focused()
+    page.keyboard.type("Milho")
+    page.keyboard.press("Tab")
+    page.keyboard.press("Tab")
+    page.keyboard.type("50,00")
+    page.keyboard.press("Enter")
+
+    expect(gaveta.locator(".itens__lista")).to_contain_text("Milho")
+    expect(gaveta.locator(".resumo__linha--saldo")).to_contain_text("R$ 150,00")
+    expect(descricao).to_be_focused()
