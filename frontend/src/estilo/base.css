@@ -17,22 +17,6 @@ h1 { font-family: var(--fonte-titulo); letter-spacing: var(--espaco-letras-titul
 
 .numero { font-family: var(--fonte-numero); font-variant-numeric: tabular-nums; }
 
-/* Marca do sistema: usada no menu e na tela de entrada. */
-.monograma {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--espaco-2);
-  background: var(--cor-destaque);
-  color: var(--cor-acao);
-  font-family: var(--fonte-titulo);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 :focus-visible {
   outline: 2px solid var(--cor-acao);
   outline-offset: 2px;

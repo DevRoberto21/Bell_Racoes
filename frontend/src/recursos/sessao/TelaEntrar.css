@@ -17,8 +17,11 @@
   border-radius: var(--raio-cartao);
 }
 
-.entrar__nome { font-size: var(--texto-titulo); font-weight: var(--peso-titulo); }
+.entrar__nome {
+  padding: var(--espaco-4);
+  border-radius: var(--raio-controle);
+  background: var(--cor-menu-fundo);
+}
+.entrar__logo { display: block; width: 100%; height: auto; }
 
 .entrar__apoio { margin-top: calc(var(--espaco-3) * -1); color: var(--cor-texto-apoio); }
-
-.entrar__cartao .monograma { align-self: flex-start; }

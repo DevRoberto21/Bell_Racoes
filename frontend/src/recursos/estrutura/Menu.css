@@ -14,17 +14,8 @@
 /* Azul sobre azul não se vê: dentro do menu o foco é amarelo. */
 .menu :focus-visible { outline-color: var(--cor-destaque); }
 
-.menu__marca {
-  display: flex;
-  align-items: center;
-  gap: var(--espaco-2);
-  padding: 0 var(--espaco-2);
-  color: var(--cor-superficie);
-  font-family: var(--fonte-titulo);
-  font-size: 18px;
-  font-weight: var(--peso-titulo);
-  letter-spacing: var(--espaco-letras-titulo);
-}
+.menu__marca { padding: 0 var(--espaco-1); }
+.menu__logo { display: block; width: 100%; height: auto; }
 
 .menu__navegacao { display: flex; flex-direction: column; gap: var(--espaco-1); }
 

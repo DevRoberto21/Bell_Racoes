@@ -1,6 +1,7 @@
 import { NavLink } from "react-router";
 import { Botao } from "../../componentes/Botao";
 import { useSair, useSessao } from "../sessao/sessao";
+import logo from "../../imagens/logo.svg";
 import "./Menu.css";
 
 const itens = [
@@ -17,10 +18,7 @@ export function Menu() {
   return (
     <aside className="menu">
       <p className="menu__marca">
-        <span className="monograma" aria-hidden="true">
-          B
-        </span>
-        Bell Rações
+        <img className="menu__logo" src={logo} alt="Bell Rações" />
       </p>
       <nav className="menu__navegacao" aria-label="Principal">
         {itens.map((item) => (
