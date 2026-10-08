@@ -16,7 +16,12 @@ export function Menu() {
 
   return (
     <aside className="menu">
-      <p className="menu__marca">Bell Rações</p>
+      <p className="menu__marca">
+        <span className="monograma" aria-hidden="true">
+          B
+        </span>
+        Bell Rações
+      </p>
       <nav className="menu__navegacao" aria-label="Principal">
         {itens.map((item) => (
           <NavLink

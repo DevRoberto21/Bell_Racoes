@@ -7,26 +7,39 @@
   width: var(--largura-menu);
   height: 100vh;
   padding: var(--espaco-5) var(--espaco-3);
-  border-right: 1px solid var(--cor-borda);
-  background: var(--cor-superficie);
+  background: var(--cor-menu-fundo);
+  color: var(--cor-menu-texto);
 }
 
-.menu__marca { padding: 0 var(--espaco-3); color: var(--cor-acao); font-weight: var(--peso-titulo); }
+/* Azul sobre azul não se vê: dentro do menu o foco é amarelo. */
+.menu :focus-visible { outline-color: var(--cor-destaque); }
+
+.menu__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: 0 var(--espaco-2);
+  color: var(--cor-superficie);
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  font-weight: var(--peso-titulo);
+  letter-spacing: var(--espaco-letras-titulo);
+}
 
 .menu__navegacao { display: flex; flex-direction: column; gap: var(--espaco-1); }
 
 .menu__item {
   padding: var(--espaco-2) var(--espaco-3);
   border-radius: var(--raio-controle);
-  color: var(--cor-texto-secundario);
+  color: var(--cor-menu-texto);
   text-decoration: none;
   transition: background var(--tempo-micro);
 }
-.menu__item:hover { background: var(--cor-fundo); }
+.menu__item:hover { background: var(--cor-menu-ativo-fundo); }
 .menu__item--ativo, .menu__item--ativo:hover {
-  background: var(--cor-acao-suave);
-  color: var(--cor-acao-suave-texto);
-  font-weight: 650;
+  background: var(--cor-menu-ativo-fundo);
+  color: var(--cor-menu-ativo-texto);
+  font-weight: 600;
 }
 
 .menu__rodape {
@@ -36,4 +49,12 @@
   margin-top: auto;
   padding: 0 var(--espaco-1);
 }
-.menu__usuario { padding: 0 var(--espaco-2); color: var(--cor-texto-secundario); font-size: var(--texto-pequeno); }
+.menu__usuario { padding: 0 var(--espaco-2); color: var(--cor-menu-texto); font-size: var(--texto-pequeno); }
+
+/* Botão Sair: contorno claro sobre o azul. Vence `.botao--contorno:hover:not(:disabled)` pela especificidade. */
+.menu__rodape .botao {
+  background: transparent;
+  border-color: var(--cor-menu-texto);
+  color: var(--cor-superficie);
+}
+.menu__rodape .botao:hover:not(:disabled) { background: var(--cor-menu-ativo-fundo); }
