@@ -11,9 +11,9 @@ describe("FormularioCliente", () => {
     render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={aoEnviar} aoCancelar={() => {}} />);
     await usuario.type(screen.getByLabelText("Nome"), "José Pereira");
     await usuario.type(screen.getByLabelText("Apelido"), "Zé");
-    await usuario.type(screen.getByLabelText("Telefone"), "11 99999-0000");
+    await usuario.type(screen.getByLabelText("Telefone"), "11999990000");
     await usuario.click(screen.getByRole("button", { name: "Criar" }));
-    expect(aoEnviar).toHaveBeenCalledWith({ nome: "José Pereira", apelido: "Zé", telefone: "11 99999-0000" });
+    expect(aoEnviar).toHaveBeenCalledWith({ nome: "José Pereira", apelido: "Zé", telefone: "(11)99999-0000" });
   });
 
   it("começa com os valores iniciais", () => {
@@ -48,5 +48,57 @@ describe("FormularioCliente", () => {
     render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={vi.fn()} aoCancelar={aoCancelar} />);
     await usuario.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(aoCancelar).toHaveBeenCalled();
+  });
+
+  it("mostra a máscara enquanto digita", async () => {
+    const usuario = userEvent.setup();
+    render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={vi.fn()} aoCancelar={() => {}} />);
+    const campo = screen.getByLabelText("Telefone");
+    await usuario.type(campo, "11912345");
+    expect(campo).toHaveValue("(11)91234-5");
+  });
+
+  it("não envia telefone incompleto e mostra o erro até digitar de novo", async () => {
+    const usuario = userEvent.setup();
+    const aoEnviar = vi.fn().mockResolvedValue(undefined);
+    render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={aoEnviar} aoCancelar={() => {}} />);
+    await usuario.type(screen.getByLabelText("Nome"), "Ana");
+    await usuario.type(screen.getByLabelText("Telefone"), "1191234");
+    await usuario.click(screen.getByRole("button", { name: "Criar" }));
+    expect(aoEnviar).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Telefone")).toHaveAccessibleDescription("Telefone incompleto. Use (dd)9xxxx-xxxx.");
+    await usuario.type(screen.getByLabelText("Telefone"), "5");
+    expect(screen.getByLabelText("Telefone")).not.toHaveAccessibleDescription("Telefone incompleto. Use (dd)9xxxx-xxxx.");
+  });
+
+  it("envia o telefone completo formatado", async () => {
+    const usuario = userEvent.setup();
+    const aoEnviar = vi.fn().mockResolvedValue(undefined);
+    render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={aoEnviar} aoCancelar={() => {}} />);
+    await usuario.type(screen.getByLabelText("Nome"), "Ana");
+    await usuario.type(screen.getByLabelText("Telefone"), "11912345678");
+    await usuario.click(screen.getByRole("button", { name: "Criar" }));
+    expect(aoEnviar).toHaveBeenCalledWith({ nome: "Ana", apelido: "", telefone: "(11)91234-5678" });
+  });
+
+  it("envia com telefone vazio", async () => {
+    const usuario = userEvent.setup();
+    const aoEnviar = vi.fn().mockResolvedValue(undefined);
+    render(<FormularioCliente rotuloEnviar="Criar" aoEnviar={aoEnviar} aoCancelar={() => {}} />);
+    await usuario.type(screen.getByLabelText("Nome"), "Ana");
+    await usuario.click(screen.getByRole("button", { name: "Criar" }));
+    expect(aoEnviar).toHaveBeenCalledWith({ nome: "Ana", apelido: "", telefone: "" });
+  });
+
+  it("mostra o valor inicial já com máscara", () => {
+    render(
+      <FormularioCliente
+        inicial={{ nome: "Maria", apelido: "", telefone: "11912345678" }}
+        rotuloEnviar="Salvar"
+        aoEnviar={vi.fn()}
+        aoCancelar={() => {}}
+      />,
+    );
+    expect(screen.getByLabelText("Telefone")).toHaveValue("(11)91234-5678");
   });
 });

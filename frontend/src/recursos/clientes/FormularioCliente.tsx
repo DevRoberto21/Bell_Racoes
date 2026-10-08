@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ErroApi } from "../../api/http";
+import { formatarTelefone, telefoneValido } from "../../api/telefone";
 import { Aviso } from "../../componentes/Aviso";
 import { Botao } from "../../componentes/Botao";
 import { Campo } from "../../componentes/Campo";
@@ -14,15 +15,27 @@ interface Props {
 }
 
 export function FormularioCliente({ inicial, rotuloEnviar, aoEnviar, aoCancelar }: Props) {
-  const [dados, setDados] = useState<DadosCliente>(inicial ?? { nome: "", apelido: "", telefone: "" });
+  const [dados, setDados] = useState<DadosCliente>(
+    inicial ? { ...inicial, telefone: formatarTelefone(inicial.telefone) } : { nome: "", apelido: "", telefone: "" },
+  );
+  const [erroTelefone, setErroTelefone] = useState<string | null>(null);
   const [erro, setErro] = useState<ErroApi | null>(null);
   const [enviando, setEnviando] = useState(false);
 
   const mudar = (campo: keyof DadosCliente) => (e: { target: { value: string } }) =>
     setDados((atuais) => ({ ...atuais, [campo]: e.target.value }));
 
+  const mudarTelefone = (e: { target: { value: string } }) => {
+    setErroTelefone(null);
+    setDados((atuais) => ({ ...atuais, telefone: formatarTelefone(e.target.value) }));
+  };
+
   async function enviar(e: FormEvent) {
     e.preventDefault();
+    if (dados.telefone !== "" && !telefoneValido(dados.telefone)) {
+      setErroTelefone("Telefone incompleto. Use (dd)9xxxx-xxxx.");
+      return;
+    }
     setEnviando(true);
     setErro(null);
     try {
@@ -39,7 +52,15 @@ export function FormularioCliente({ inicial, rotuloEnviar, aoEnviar, aoCancelar 
       {erro && <Aviso tipo="erro">{erro.message}</Aviso>}
       <Campo rotulo="Nome" value={dados.nome} onChange={mudar("nome")} erro={erro?.campos.nome} autoComplete="off" />
       <Campo rotulo="Apelido" value={dados.apelido} onChange={mudar("apelido")} erro={erro?.campos.apelido} autoComplete="off" />
-      <Campo rotulo="Telefone" value={dados.telefone} onChange={mudar("telefone")} erro={erro?.campos.telefone} autoComplete="off" />
+      <Campo
+        rotulo="Telefone"
+        value={dados.telefone}
+        onChange={mudarTelefone}
+        erro={erroTelefone ?? erro?.campos.telefone}
+        inputMode="numeric"
+        placeholder="(00)90000-0000"
+        autoComplete="off"
+      />
       <div className="formulario-cliente__acoes">
         <Botao variante="contorno" onClick={aoCancelar}>
           Cancelar

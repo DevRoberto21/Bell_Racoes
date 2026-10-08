@@ -33,7 +33,7 @@ function cliente(extra: Partial<ClienteDetalhe> = {}): ClienteDetalhe {
     codigo_formatado: "12",
     nome: "José Pereira",
     apelido: "Zé",
-    telefone: "11 99999-0000",
+    telefone: "(11)99999-0000",
     divida: "241.10",
     notas_abertas: 2,
     notas: [nota("12-01"), nota("12-03", { editada: true })],
@@ -77,7 +77,7 @@ describe("TelaCliente", () => {
     simular(cliente());
     tela();
     expect(await screen.findByRole("heading", { name: "12 · José Pereira (Zé)" })).toBeInTheDocument();
-    expect(screen.getByText("11 99999-0000")).toBeInTheDocument();
+    expect(screen.getByText("(11)99999-0000")).toBeInTheDocument();
     expect(screen.getByText("R$ 241,10")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Notas em aberto" })).toBeInTheDocument();
     const editada = screen.getByRole("button", { name: /12-03/ });
@@ -192,7 +192,7 @@ describe("TelaCliente", () => {
     await usuario.type(nome, "José P.");
     await usuario.click(screen.getByRole("button", { name: "Salvar" }));
     const chamada = fetchSimulado.mock.calls.find(([, o]) => o?.method === "PATCH");
-    expect(JSON.parse(chamada![1].body)).toEqual({ nome: "José P.", apelido: "Zé", telefone: "11 99999-0000" });
+    expect(JSON.parse(chamada![1].body)).toEqual({ nome: "José P.", apelido: "Zé", telefone: "(11)99999-0000" });
     await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
