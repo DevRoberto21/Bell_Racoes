@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -42,6 +42,10 @@ function cliente(extra: Partial<ClienteDetalhe> = {}): ClienteDetalhe {
     ...extra,
   };
 }
+
+const continua = (extra: Partial<NotaResumo> = {}) => nota("12-02", { tipo: "CONTINUA", tipo_rotulo: "Contínua", ...extra });
+const comContinua = () => cliente({ notas: [nota("12-01"), continua()], tem_continua_aberta: true });
+const local = () => screen.getByTestId("local");
 
 let fetchSimulado: ReturnType<typeof vi.fn>;
 
@@ -91,12 +95,46 @@ describe("TelaCliente", () => {
     expect(screen.getByTestId("local")).toHaveTextContent("/clientes/12?nota=12-03");
   });
 
-  it("nova nota contínua fica desabilitada, com explicação, quando já existe uma aberta", async () => {
-    simular(cliente({ tem_continua_aberta: true }));
+  it("com contínua aberta, o botão vira Abrir nota contínua e abre a gaveta dela", async () => {
+    simular(comContinua());
     tela();
-    const botao = await screen.findByRole("button", { name: "Nova nota contínua" });
-    expect(botao).toBeDisabled();
-    expect(botao).toHaveAttribute("title", "Já existe uma nota contínua aberta");
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Abrir nota contínua" }));
+    expect(local()).toHaveTextContent("/clientes/12?nota=12-02");
+    expect(screen.queryByRole("button", { name: "Nova nota contínua" })).not.toBeInTheDocument();
+    expect(fetchSimulado.mock.calls.every(([, o]) => (o?.method ?? "GET") === "GET")).toBe(true);
+  });
+
+  it("C abre a contínua aberta, em maiúscula ou minúscula", async () => {
+    simular(comContinua());
+    tela();
+    const usuario = userEvent.setup();
+    await screen.findByRole("heading", { name: "Notas em aberto" });
+    await usuario.keyboard("C");
+    expect(local()).toHaveTextContent("/clientes/12?nota=12-02");
+  });
+
+  it("C não faz nada sem contínua aberta", async () => {
+    simular(cliente({ notas: [nota("12-01"), continua({ situacao: "FECHADA", situacao_rotulo: "Fechada" })] }));
+    tela();
+    const usuario = userEvent.setup();
+    await screen.findByRole("heading", { name: "Notas em aberto" });
+    await usuario.keyboard("c");
+    expect(local()).toHaveTextContent(/^\/clientes\/12$/);
+    expect(screen.getByRole("button", { name: "Nova nota contínua" })).toBeEnabled();
+  });
+
+  it("C não faz nada com um diálogo aberto, nem com o foco num campo", async () => {
+    simular(comContinua());
+    tela();
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole("button", { name: "Editar cadastro" }));
+    const dialogo = await screen.findByRole("dialog", { name: "Editar cadastro" });
+    await usuario.keyboard("c");
+    expect(local()).toHaveTextContent(/^\/clientes\/12$/);
+    await usuario.click(within(dialogo).getByLabelText("Nome"));
+    await usuario.keyboard("c");
+    expect(local()).toHaveTextContent(/^\/clientes\/12$/);
   });
 
   it("nova nota contínua fica habilitada quando não há contínua aberta", async () => {

@@ -63,6 +63,15 @@ export function TelaCliente() {
     },
     { ativo: cliente.data !== undefined },
   );
+  const continuaAberta = cliente.data?.notas.find((n) => n.tipo === "CONTINUA" && n.situacao === "ABERTA");
+  // C abre a nota contínua aberta, com as mesmas travas do N; sem contínua aberta, nada.
+  useAtalho(
+    "c",
+    () => {
+      if (!haCamadaAberta() && continuaAberta) abrirNota(continuaAberta.codigo);
+    },
+    { ativo: continuaAberta !== undefined },
+  );
 
   if (cliente.error instanceof ErroApi && cliente.error.status === 404) {
     return (
@@ -102,14 +111,15 @@ export function TelaCliente() {
         <Botao onClick={() => novaNota("UNICA")} disabled={criarNota.isPending}>
           Nova nota única
         </Botao>
-        <Botao
-          variante="contorno"
-          onClick={() => novaNota("CONTINUA")}
-          disabled={c.tem_continua_aberta || criarNota.isPending}
-          title={c.tem_continua_aberta ? "Já existe uma nota contínua aberta" : undefined}
-        >
-          Nova nota contínua
-        </Botao>
+        {continuaAberta ? (
+          <Botao variante="contorno" onClick={() => abrirNota(continuaAberta.codigo)}>
+            Abrir nota contínua
+          </Botao>
+        ) : (
+          <Botao variante="contorno" onClick={() => novaNota("CONTINUA")} disabled={criarNota.isPending}>
+            Nova nota contínua
+          </Botao>
+        )}
         {c.divida !== "0.00" && (
           <Botao variante="contorno" onClick={() => setPagando(true)}>
             Pagar dívida total
