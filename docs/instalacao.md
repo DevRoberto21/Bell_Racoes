@@ -16,7 +16,20 @@ O instalador:
 - faz o sistema abrir junto com o Windows;
 - libera a porta 8000 no Firewall do Windows, só para rede privada.
 
-Depois, uma vez só: fixe o endereço IP do caixa 1 no roteador (por exemplo `192.168.0.10`).
+Depois, uma vez só:
+
+- fixe o endereço IP do caixa 1 no roteador (por exemplo `192.168.0.10`);
+- no caixa 1, deixe a rede da loja como rede privada: Configurações → Rede e Internet → propriedades da conexão → Perfil de rede: **Particular** (Rede privada). A porta 8000 só é liberada para rede privada; se o Windows marcar a rede como pública, o caixa 2 não consegue abrir o sistema.
+
+### Se o caixa 1 já usava o iniciar.bat
+
+Se o sistema já estava instalado do jeito antigo (com o `iniciar.bat`), faça isto ANTES de instalar:
+
+1. Feche a janela preta do sistema.
+2. Aperte `Win + R`, digite `shell:startup` e apague o atalho do `iniciar.bat`.
+3. Rode o instalador normalmente.
+
+Os dados em `C:\BellRacoes\dados` são mantidos e as senhas dos caixas continuam as mesmas: os usuários já existem no banco, então a janela não pede senha na primeira abertura.
 
 ### Primeira abertura
 
@@ -41,7 +54,7 @@ Nunca apague a pasta `C:\BellRacoes\dados` nem copie outra por cima dela: ela gu
 
 ## Navegador (os dois caixas)
 
-- No caixa 1, o sistema abre o Chrome sozinho em `http://localhost:8000`, já com impressão sem janela de confirmação. Isso só vale se o Chrome estava fechado antes de abrir o sistema. Sem Chrome instalado, abre o navegador padrão.
+- No caixa 1, o sistema abre o Chrome sozinho em `http://localhost:8000`, já com impressão sem janela de confirmação. Isso só vale se o Chrome estava fechado antes de abrir o sistema. Sem Chrome instalado, abre o navegador padrão. Se a janela de confirmação da impressão ainda aparecer, desligue a opção "Continuar executando aplicativos em segundo plano quando o Google Chrome estiver fechado" nas configurações do Chrome (Sistema), porque um Chrome que ficou rodando em segundo plano faz o sistema ignorar a impressão sem janela.
 - No caixa 2, crie um atalho do Chrome com:
 
   ```
@@ -86,7 +99,7 @@ Faça isto só se o banco atual estiver perdido ou estragado. Tudo o que foi lan
 2. Abra a pasta `C:\BellRacoes\dados`.
 3. Renomeie `bellracoes.sqlite3` para `bellracoes-estragado.sqlite3`. Assim o arquivo atual fica guardado.
 4. Apague os arquivos `bellracoes.sqlite3-wal` e `bellracoes.sqlite3-shm`, se existirem.
-5. Abra a pasta `backups`, copie o arquivo do dia desejado (por exemplo `bellracoes-2026-10-05.sqlite3`) e cole na pasta `dados`.
+5. Abra a pasta `backups`, copie o arquivo do dia desejado (por exemplo `bellracoes-2026-10-05.sqlite3`) e cole na pasta `dados`. Se a variável `BELL_BACKUP_DIR` foi configurada, o arquivo precisa vir da pasta indicada nela, e não de `dados\backups`: as cópias de `dados\backups` pararam no dia em que a variável foi configurada, e restaurar uma delas descarta tudo o que foi lançado desde então.
 6. Renomeie a cópia colada para exatamente `bellracoes.sqlite3`.
 7. Abra o sistema pelo atalho e confira as notas de um cliente conhecido.
 
@@ -100,7 +113,7 @@ O sistema não tem proteção para rede aberta. Use só na rede interna da loja.
 - [ ] Conferir se o nome e o endereço da loja, com acentos, aparecem certos numa nota impressa.
 - [ ] Imprimir uma nota e um recibo na impressora térmica, sem janela de confirmação.
 - [ ] Reiniciar o caixa 1 e conferir que o sistema abre sozinho.
-- [ ] Abrir o sistema a partir do caixa 2.
+- [ ] Abrir o sistema a partir do caixa 2. Se não abrir, confira se a rede do caixa 1 está como rede privada.
 - [ ] Abrir uma nota, receber um pagamento e conferir que o recibo abre em nova aba.
 - [ ] Instalar a mesma versão por cima e conferir que os clientes e as notas continuam lá.
 
