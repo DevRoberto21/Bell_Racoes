@@ -22,3 +22,11 @@ def test_telas_vem_da_pasta_de_recursos():
 
 def test_settings_nao_expoe_mais_base_dir():
     assert not hasattr(settings, "BASE_DIR")
+
+
+def test_endereco_padrao_da_loja():
+    assert settings.LOJA_ENDERECO == "Rua Coronel Antônio Vicente, 134, Centro, Timbaúba"
+
+
+def test_loja_nao_tem_telefone_na_configuracao():
+    assert not hasattr(settings, "LOJA_TELEFONE")
