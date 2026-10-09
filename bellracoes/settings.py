@@ -3,8 +3,9 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = Path(os.environ.get("BELL_DATA_DIR", BASE_DIR / "dados"))
+from bellracoes.caminhos import pasta_de_recursos, pasta_do_programa
+
+DATA_DIR = Path(os.environ.get("BELL_DATA_DIR", pasta_do_programa() / "dados"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -83,7 +84,7 @@ USE_THOUSAND_SEPARATOR = False
 
 STATIC_URL = "static/"
 WHITENOISE_USE_FINDERS = True
-FRONT_DIST = BASE_DIR / "frontend" / "dist"
+FRONT_DIST = pasta_de_recursos() / "frontend" / "dist"
 STATICFILES_DIRS = [("app", FRONT_DIST)] if FRONT_DIST.exists() else []
 
 LOGIN_URL = "/entrar"
