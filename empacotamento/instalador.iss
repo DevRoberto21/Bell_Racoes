@@ -43,6 +43,8 @@ Name: "{app}\dados"; Permissions: users-modify; Flags: uninsneveruninstall
 [InstallDelete]
 ; Ao atualizar por cima, some com os arquivos da versão anterior. A pasta dados não é tocada.
 Type: filesandordirs; Name: "{app}\_internal"
+; Remove o iniciar.bat da instalação manual antiga, para ninguém abrir o sistema por ele.
+Type: files; Name: "{app}\iniciar.bat"
 
 [Files]
 Source: "..\dist\BellRacoes\*"; DestDir: "{app}"; Excludes: "dados\*"; Flags: recursesubdirs createallsubdirs ignoreversion

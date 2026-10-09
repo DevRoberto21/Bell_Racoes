@@ -43,7 +43,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
 
       - name: Dependências do Python
-        run: uv sync --group build
+        run: uv sync --locked --group build
 
       - name: Testes do backend
         run: uv run pytest fiado/tests -q
