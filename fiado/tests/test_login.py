@@ -96,3 +96,20 @@ def test_criar_caixas_com_senhas_por_argumento_nao_pergunta(monkeypatch, django_
     monkeypatch.setattr("getpass.getpass", nao_pode_perguntar)
     call_command("criar_caixas", senha1="senha-forte-1", senha2="senha-forte-2")
     assert django_user_model.objects.count() == 2
+
+
+def test_criar_caixas_interrompido_no_segundo_caixa_nao_grava_nenhum(
+    monkeypatch, django_user_model
+):
+    respostas = iter(["senha-1", "senha-1"])
+
+    def digitar(pergunta):
+        try:
+            return next(respostas)
+        except StopIteration:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr("getpass.getpass", digitar)
+    with pytest.raises(KeyboardInterrupt):
+        call_command("criar_caixas")
+    assert django_user_model.objects.count() == 0

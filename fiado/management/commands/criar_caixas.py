@@ -2,6 +2,7 @@ import getpass
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 CAIXAS = [("caixa1", "Flávia", "senha1"), ("caixa2", "Marcineide", "senha2")]
 SENHA_EM_BRANCO = "A senha não pode ficar em branco."
@@ -19,15 +20,18 @@ class Command(BaseCommand):
         Usuario = get_user_model()
         if not all(opcoes[chave] for _, _, chave in CAIXAS):
             self.stdout.write(AVISO)
-        for nome_de_usuario, nome, chave in CAIXAS:
-            senha = opcoes[chave] or self._perguntar(nome_de_usuario, nome)
-            if not senha.strip():
-                raise CommandError(SENHA_EM_BRANCO)
-            usuario, _ = Usuario.objects.get_or_create(username=nome_de_usuario)
-            usuario.first_name = nome
-            usuario.set_password(senha)
-            usuario.save()
-            self.stdout.write(f"{nome_de_usuario} pronto.")
+        # Os dois caixas são gravados juntos ou nenhum: se a janela fechar no meio,
+        # a próxima abertura volta a pedir as senhas.
+        with transaction.atomic():
+            for nome_de_usuario, nome, chave in CAIXAS:
+                senha = opcoes[chave] or self._perguntar(nome_de_usuario, nome)
+                if not senha.strip():
+                    raise CommandError(SENHA_EM_BRANCO)
+                usuario, _ = Usuario.objects.get_or_create(username=nome_de_usuario)
+                usuario.first_name = nome
+                usuario.set_password(senha)
+                usuario.save()
+                self.stdout.write(f"{nome_de_usuario} pronto.")
 
     def _perguntar(self, nome_de_usuario, nome):
         while True:
