@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { simularMovimentoReduzido } from "../teste/movimento";
 import { Dinheiro } from "./Dinheiro";
 
@@ -20,6 +20,23 @@ describe("Dinheiro", () => {
     expect(screen.getByText("R$ 10,00")).toBeInTheDocument();
     rerender(<Dinheiro valor="4812.50" animar />);
     await waitFor(() => expect(screen.getByText("R$ 4.812,50")).toBeInTheDocument(), { timeout: 2000 });
+  });
+
+  it("com animar, termina no tempo base mesmo com o relógio dos quadros atrasado", async () => {
+    // No jsdom o instante que o quadro recebe parte de uma origem posterior à de performance.now():
+    // a diferença é o tempo de preparo do ambiente, que num computador lento passa de segundos.
+    const atraso = 5000;
+    vi.stubGlobal("requestAnimationFrame", (passo: FrameRequestCallback) =>
+      setTimeout(() => passo(performance.now() - atraso), 16),
+    );
+    vi.stubGlobal("cancelAnimationFrame", (quadro: number) => clearTimeout(quadro));
+    try {
+      const { rerender } = render(<Dinheiro valor="10.00" animar />);
+      rerender(<Dinheiro valor="4812.50" animar />);
+      await waitFor(() => expect(screen.getByText("R$ 4.812,50")).toBeInTheDocument(), { timeout: 2000 });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("com animar e movimento reduzido, mostra o valor final na hora", () => {
