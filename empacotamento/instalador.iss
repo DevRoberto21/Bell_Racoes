@@ -45,7 +45,7 @@ Name: "{app}\dados"; Permissions: users-modify; Flags: uninsneveruninstall
 Type: filesandordirs; Name: "{app}\_internal"
 
 [Files]
-Source: "..\dist\BellRacoes\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "..\dist\BellRacoes\*"; DestDir: "{app}"; Excludes: "dados\*"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
 Name: "{autodesktop}\{#Nome}"; Filename: "{app}\{#Executavel}"; WorkingDir: "{app}"
