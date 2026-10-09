@@ -4,91 +4,91 @@ O sistema roda no computador central (caixa 1). O caixa 2 só precisa de um nave
 
 ## Caixa 1 (servidor)
 
-**Antes de copiar, na máquina de desenvolvimento (precisa de Node 20 ou mais novo):**
+1. Abra https://github.com/DevRoberto21/Bell_Racoes/releases e baixe `BellRacoes-Setup.exe` da versão mais recente.
+2. Dê dois cliques no arquivo. O Windows pode mostrar a tela azul "O Windows protegeu o computador": clique em **Mais informações** e depois em **Executar assim mesmo**. O aviso aparece porque o instalador não tem assinatura paga; ele é o mesmo arquivo gerado a partir deste repositório.
+3. Aceite o pedido de permissão de administrador e clique em **Avançar** até **Concluir**.
 
-```bash
-npm --prefix frontend ci
-npm --prefix frontend run build
-```
+O instalador:
 
-Isso gera a pasta `frontend/dist`, que precisa ir junto. A loja não precisa de Node.
+- copia o sistema para `C:\BellRacoes`;
+- cria o atalho **Bell Rações** na área de trabalho e no menu Iniciar;
+- cria o atalho **Trocar senhas** no menu Iniciar;
+- faz o sistema abrir junto com o Windows;
+- libera a porta 8000 no Firewall do Windows, só para rede privada.
 
-1. Instale o `uv`: https://docs.astral.sh/uv/getting-started/installation/
-2. Copie a pasta do projeto para `C:\BellRacoes`. Copie tudo, menos as pastas `.venv`, `dados` e `frontend/node_modules`. A pasta `dados` guarda o banco da loja: nunca copie outra por cima dela, nem ao atualizar o sistema.
-3. Abra o Prompt de Comando nessa pasta e rode:
+Depois, uma vez só: fixe o endereço IP do caixa 1 no roteador (por exemplo `192.168.0.10`).
 
-   ```bat
-   uv sync --no-dev
-   uv run --no-dev python manage.py migrate
-   uv run --no-dev python manage.py criar_caixas
-   ```
+### Primeira abertura
 
-   O último comando pede a senha do `caixa1` e do `caixa2`. Rode de novo quando quiser trocar uma senha.
+Na primeira vez, a janela preta do sistema pede a senha do `caixa1` (Flávia) e do `caixa2` (Marcineide).
 
-4. Dê dois cliques em `iniciar.bat`. A janela preta precisa ficar aberta enquanto a loja estiver funcionando.
-5. Para iniciar junto com o Windows: `Win + R`, digite `shell:startup`, e coloque ali um atalho para `iniciar.bat`.
-6. Fixe o endereço IP do caixa 1 no roteador (por exemplo `192.168.0.10`) e libere a porta 8000 no Firewall do Windows para a rede privada.
+- Ao digitar a senha, nada aparece na tela. Digite e aperte Enter.
+- Cada senha é pedida duas vezes. Se as duas não forem iguais, o sistema pergunta de novo.
+
+Em seguida o navegador abre no sistema. A janela preta precisa ficar aberta enquanto a loja estiver funcionando: fechá-la desliga o sistema.
+
+### Trocar ou recuperar uma senha
+
+No menu Iniciar, abra **Bell Rações → Trocar senhas** e responda às mesmas perguntas. Não é preciso saber a senha antiga, então isso serve também para senha esquecida. Só funciona no caixa 1.
 
 ## Atualizar o sistema
 
-Quando houver uma versão nova:
+1. Baixe o `BellRacoes-Setup.exe` da versão nova na página Releases.
+2. Dê dois cliques e avance até o fim. O instalador fecha o sistema, troca os arquivos e mantém a pasta `C:\BellRacoes\dados` como está.
+3. Abra o sistema pelo atalho.
 
-1. Na máquina de desenvolvimento, gere as telas de novo:
-
-   ```bash
-   npm --prefix frontend ci
-   npm --prefix frontend run build
-   ```
-
-2. Copie a pasta do projeto de novo para `C:\BellRacoes`, por cima da anterior. Copie tudo, menos as pastas `.venv`, `dados` e `frontend/node_modules`. O `iniciar.bat` é copiado junto: se os dados da loja foram alterados nele, confira as três linhas depois de copiar (veja "Dados da loja no impresso").
-3. Feche a janela preta do sistema e abra o `iniciar.bat` de novo. O servidor lê a lista de arquivos das telas quando inicia: sem fechar e abrir, as telas novas não carregam.
+Nunca apague a pasta `C:\BellRacoes\dados` nem copie outra por cima dela: ela guarda o banco da loja. Desinstalar o sistema também não a remove.
 
 ## Navegador (os dois caixas)
 
-- Caixa 1 abre `http://localhost:8000`. Caixa 2 abre `http://192.168.0.10:8000`.
-- Para imprimir sem a janela de confirmação, crie um atalho do Chrome com:
+- No caixa 1, o sistema abre o Chrome sozinho em `http://localhost:8000`, já com impressão sem janela de confirmação. Isso só vale se o Chrome estava fechado antes de abrir o sistema. Sem Chrome instalado, abre o navegador padrão.
+- No caixa 2, crie um atalho do Chrome com:
 
   ```
-  "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk-printing http://localhost:8000
+  "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk-printing http://192.168.0.10:8000
   ```
 
-  No caixa 2, troque `localhost` pelo IP do caixa 1.
+  Troque `192.168.0.10` pelo IP do caixa 1.
 - No Windows, deixe a impressora térmica de 80 mm como impressora padrão de cada caixa.
 - As notas e os recibos abrem em nova aba para imprimir; libere pop-ups para o endereço do sistema quando o Chrome perguntar.
 
 ## Dados da loja no impresso
 
-O nome, o endereço e o telefone que saem na nota e no recibo ficam no começo do arquivo `iniciar.bat`:
+A nota e o recibo saem com o nome `Bell Rações` e o endereço `Rua Coronel Antônio Vicente, 134, Centro, Timbaúba`.
 
-1. Clique com o botão direito em `iniciar.bat` e escolha **Editar**.
-2. Altere o que vem depois do sinal de igual nestas três linhas, sem aspas:
+Para mudar sem trocar de versão, abra o Prompt de Comando no caixa 1 e rode, com o texto novo:
 
-   ```bat
-   set BELL_LOJA_NOME=Bell Rações
-   set BELL_LOJA_ENDERECO=Rua Exemplo, 123
-   set BELL_LOJA_TELEFONE=(85) 99999-0000
-   ```
+```bat
+setx BELL_LOJA_ENDERECO "Rua Nova, 10, Centro, Timbaúba"
+setx BELL_LOJA_NOME "Bell Rações"
+```
 
-3. Salve, feche a janela preta do sistema e abra o `iniciar.bat` de novo.
+Depois feche a janela preta do sistema e abra de novo pelo atalho.
 
 ## Onde ficam os dados
 
 - Banco: `C:\BellRacoes\dados\bellracoes.sqlite3`.
-- Cópias de segurança: `C:\BellRacoes\dados\backups\`, uma por dia, últimas 30. Para gravar em outro lugar (pen drive, pasta do Google Drive), defina `BELL_BACKUP_DIR`. Para definir, acrescente uma linha `set BELL_BACKUP_DIR=E:\backups-bell` no `iniciar.bat`, junto das linhas da loja.
-- As cópias ficam, por padrão, no mesmo disco do banco. Se o disco estragar, perde-se tudo. Aponte `BELL_BACKUP_DIR` para um pen drive ou uma pasta sincronizada.
+- Cópias de segurança: `C:\BellRacoes\dados\backups\`, uma por dia, últimas 30.
+- As cópias ficam, por padrão, no mesmo disco do banco. Se o disco estragar, perde-se tudo. Para gravar em um pen drive ou numa pasta sincronizada (Google Drive), abra o Prompt de Comando e rode:
+
+  ```bat
+  setx BELL_BACKUP_DIR "E:\backups-bell"
+  ```
+
+  Depois feche a janela preta do sistema e abra de novo.
 - Se a cópia do dia falhar, o Painel mostra um aviso em vermelho.
 
 ### Como restaurar uma cópia
 
 Faça isto só se o banco atual estiver perdido ou estragado. Tudo o que foi lançado depois da cópia escolhida se perde.
 
-1. Feche a janela preta do `iniciar.bat`.
+1. Feche a janela preta do sistema.
 2. Abra a pasta `C:\BellRacoes\dados`.
 3. Renomeie `bellracoes.sqlite3` para `bellracoes-estragado.sqlite3`. Assim o arquivo atual fica guardado.
 4. Apague os arquivos `bellracoes.sqlite3-wal` e `bellracoes.sqlite3-shm`, se existirem.
 5. Abra a pasta `backups`, copie o arquivo do dia desejado (por exemplo `bellracoes-2026-10-05.sqlite3`) e cole na pasta `dados`.
 6. Renomeie a cópia colada para exatamente `bellracoes.sqlite3`.
-7. Abra o `iniciar.bat` de novo e confira as notas de um cliente conhecido.
+7. Abra o sistema pelo atalho e confira as notas de um cliente conhecido.
 
 ## Rede
 
@@ -96,8 +96,40 @@ O sistema não tem proteção para rede aberta. Use só na rede interna da loja.
 
 ## Antes de usar de verdade
 
-- [ ] Rodar o `iniciar.bat` no computador da loja.
-- [ ] Conferir se o nome da loja, com acentos, aparece certo numa nota impressa.
-- [ ] Imprimir uma nota e um recibo na impressora térmica.
+- [ ] Instalar no computador da loja e passar pela primeira abertura.
+- [ ] Conferir se o nome e o endereço da loja, com acentos, aparecem certos numa nota impressa.
+- [ ] Imprimir uma nota e um recibo na impressora térmica, sem janela de confirmação.
+- [ ] Reiniciar o caixa 1 e conferir que o sistema abre sozinho.
 - [ ] Abrir o sistema a partir do caixa 2.
 - [ ] Abrir uma nota, receber um pagamento e conferir que o recibo abre em nova aba.
+- [ ] Instalar a mesma versão por cima e conferir que os clientes e as notas continuam lá.
+
+## Para quem desenvolve
+
+Rodar na máquina de desenvolvimento (precisa de `uv` e de Node 20 ou mais novo):
+
+```bash
+npm --prefix frontend ci
+npm --prefix frontend run build
+uv run python iniciar.py
+```
+
+`uv run python iniciar.py criar_caixas` define as senhas; `uv run python manage.py <comando>` continua funcionando.
+
+### Publicar uma versão
+
+O instalador é gerado pelo GitHub Actions (`.github/workflows/build-windows.yml`) num computador Windows do GitHub. Para publicar:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Em alguns minutos o `BellRacoes-Setup.exe` aparece na página Releases. O workflow roda os testes, empacota com o PyInstaller, sobe o executável de verdade num teste de fumaça e só então gera o instalador.
+
+Arquivos do empacotamento, em `empacotamento/`:
+
+- `BellRacoes.spec`: receita do PyInstaller.
+- `instalador.iss`: script do Inno Setup (UTF-8 com BOM).
+- `bell.ico`: ícone, gerado por `gerar_icone.py` a partir de `frontend/public/favicon.svg`.
+- `teste_de_fumaca.py`: confere que o pacote sobe e responde.
