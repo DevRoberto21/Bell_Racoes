@@ -48,3 +48,68 @@ def test_criar_caixas_recusa_senha_em_branco(django_user_model):
     with pytest.raises(CommandError, match="A senha não pode ficar em branco."):
         call_command("criar_caixas", senha1="senha-forte-1", senha2="   ")
     assert not django_user_model.objects.filter(username="caixa2").exists()
+
+
+def _digitar(monkeypatch, *respostas):
+    fila = iter(respostas)
+    monkeypatch.setattr("getpass.getpass", lambda pergunta: next(fila))
+
+
+def _criar_caixas_digitando(monkeypatch, *respostas):
+    from io import StringIO
+
+    _digitar(monkeypatch, *respostas)
+    saida = StringIO()
+    call_command("criar_caixas", stdout=saida)
+    return saida.getvalue()
+
+
+def test_criar_caixas_pede_cada_senha_duas_vezes_e_avisa_que_nao_aparece(
+    monkeypatch, django_user_model
+):
+    saida = _criar_caixas_digitando(monkeypatch, "senha-1", "senha-1", "senha-2", "senha-2")
+    assert django_user_model.objects.get(username="caixa1").check_password("senha-1")
+    assert django_user_model.objects.get(username="caixa2").check_password("senha-2")
+    assert "nada aparece na tela" in saida
+
+
+def test_criar_caixas_com_confirmacao_diferente_pede_de_novo(monkeypatch, django_user_model):
+    saida = _criar_caixas_digitando(
+        monkeypatch, "senha-1", "senha-x", "senha-1", "senha-1", "senha-2", "senha-2"
+    )
+    assert "As senhas não são iguais. Tente de novo." in saida
+    assert django_user_model.objects.get(username="caixa1").check_password("senha-1")
+
+
+def test_criar_caixas_digitando_em_branco_pede_de_novo(monkeypatch, django_user_model):
+    saida = _criar_caixas_digitando(
+        monkeypatch, "   ", "senha-1", "senha-1", "senha-2", "senha-2"
+    )
+    assert "A senha não pode ficar em branco." in saida
+    assert django_user_model.objects.get(username="caixa1").check_password("senha-1")
+
+
+def test_criar_caixas_com_senhas_por_argumento_nao_pergunta(monkeypatch, django_user_model):
+    def nao_pode_perguntar(pergunta):
+        raise AssertionError("não devia perguntar")
+
+    monkeypatch.setattr("getpass.getpass", nao_pode_perguntar)
+    call_command("criar_caixas", senha1="senha-forte-1", senha2="senha-forte-2")
+    assert django_user_model.objects.count() == 2
+
+
+def test_criar_caixas_interrompido_no_segundo_caixa_nao_grava_nenhum(
+    monkeypatch, django_user_model
+):
+    respostas = iter(["senha-1", "senha-1"])
+
+    def digitar(pergunta):
+        try:
+            return next(respostas)
+        except StopIteration:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr("getpass.getpass", digitar)
+    with pytest.raises(KeyboardInterrupt):
+        call_command("criar_caixas")
+    assert django_user_model.objects.count() == 0

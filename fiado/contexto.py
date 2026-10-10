@@ -6,6 +6,5 @@ def loja(request):
         "loja": {
             "nome": settings.LOJA_NOME,
             "endereco": settings.LOJA_ENDERECO,
-            "telefone": settings.LOJA_TELEFONE,
         }
     }

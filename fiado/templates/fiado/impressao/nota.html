@@ -5,7 +5,6 @@
 <section class="via">
   <h1>{{ loja.nome }}</h1>
   {% if loja.endereco %}<div class="centro">{{ loja.endereco }}</div>{% endif %}
-  {% if loja.telefone %}<div class="centro">{{ loja.telefone }}</div>{% endif %}
   <div class="linha"></div>
   <div class="centro">NOTA DE FIADO · {{ nota.get_tipo_display|upper }}</div>
   <div class="codigo">{{ nota.codigo }}</div>

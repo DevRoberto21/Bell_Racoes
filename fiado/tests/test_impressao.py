@@ -143,3 +143,27 @@ def test_sem_login_redireciona_para_entrar_com_o_destino(client, caminho):
     resposta = client.get(caminho)
     assert resposta.status_code == 302
     assert resposta["Location"] == f"/entrar?next={caminho}"
+
+
+ENDERECO_DA_LOJA = "Rua Coronel Antônio Vicente, 134, Centro, Timbaúba"
+
+
+def test_nota_e_recibo_trazem_o_endereco_da_loja(logado, cliente, usuario):
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    pagamento = _pagar(nota, usuario, "40.00")
+    for caminho in ["/notas/1-1/imprimir/", f"/recibos/{pagamento.id}/"]:
+        assert ENDERECO_DA_LOJA in logado.get(caminho).content.decode(), caminho
+
+
+def test_impresso_nao_traz_telefone_da_loja(logado, cliente, usuario, settings):
+    settings.LOJA_TELEFONE = "(81)90000-1111"
+    nota = nota_unica_fechada(cliente, usuario, "100.00")
+    pagamento = _pagar(nota, usuario, "40.00")
+    for caminho in ["/notas/1-1/imprimir/", f"/recibos/{pagamento.id}/"]:
+        assert "(81)90000-1111" not in logado.get(caminho).content.decode(), caminho
+
+
+def test_contexto_da_loja_tem_so_nome_e_endereco():
+    from fiado.contexto import loja
+
+    assert set(loja(None)["loja"]) == {"nome", "endereco"}

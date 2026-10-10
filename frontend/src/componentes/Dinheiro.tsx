@@ -30,9 +30,12 @@ export function Dinheiro({ valor, animar = false }: Props) {
     const origem = atual.current;
     const destino = paraCentavos(valor);
     if (origem === destino) return;
-    const inicio = performance.now();
+    // O início vem do primeiro quadro: o instante que o quadro recebe e performance.now() podem
+    // partir de origens diferentes, e misturar os dois estica ou encurta a contagem.
+    let inicio: number | null = null;
     let quadro = 0;
     const passo = (agora: number) => {
+      inicio ??= agora;
       const progresso = Math.min((agora - inicio) / duracao, 1);
       const suave = 1 - (1 - progresso) ** 3;
       const proximo =
